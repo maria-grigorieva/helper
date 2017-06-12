@@ -1,0 +1,61 @@
+PR_ID,DESCRIPTION,REFERENCE_LINK,PHYS_GROUP,ENERGY_GEV,PROJECT
+9589,Combined egamma+JetETmiss priority 0+ request : re-simulation pf Pythia photon-jet samples for mc16 pre-production,https://its.cern.ch/jira/browse/ATLMCPROD-3800,EGAM,13000,mc16_13TeV
+9330,[Validation priority]  MC16 NN Training/Validation,https://its.cern.ch/jira/browse/ATLMCPROD-3666,IDTR,13000,mc16_valid
+9351,Minimum Bias Production for MC16 Validation,https://its.cern.ch/jira/browse/ATLMCPROD-3665,SIMU,13000,mc16_valid
+9473,Priority 0+ simulation of Z->ee events with mc16a,https://its.cern.ch/jira/browse/ATLMCPROD-3735,EGAM,13000,mc16_13TeV
+9541,MC16a PowhegZmumu,https://its.cern.ch/jira/browse/ATLMCPROD-3770,JETM,13000,mc16_13TeV
+9466,MC16 HITS productions for ttbar and Zprime samples,https://its.cern.ch/jira/browse/ATLMCPROD-3729,FTAG,13000,mc16_13TeV
+9484,tauCP priority 0+ request : mc16a simulation of Z->tau tau and DY-> tautau events ,https://its.cern.ch/jira/browse/ATLMCPROD-3737,TAUP,13000,mc16_13TeV
+9474,Priority 0+ simulation of single-particles,https://its.cern.ch/jira/browse/ATLMCPROD-3736,EGAM,13000,mc16_13TeV
+9388,Priority 0+ econstruction of mc16 single particles for MVA calibration and tuning of converted photons,https://its.cern.ch/jira/browse/ATLMCPROD-3684,EGAM,13000,mc16_13TeV
+8786,Single Particle Samples for MC16 Pre-Production,https://its.cern.ch/jira/browse/ATLMCPROD-3337,SIMU,13000,mc16_13TeV
+9485,tauCP priority 0+ request : mc16a simulation of DY-> ee events ,https://its.cern.ch/jira/browse/ATLMCPROD-3744,TAUP,13000,mc16_13TeV
+10623,"Updated Minbias samples for MC16, 21.0.14",https://its.cern.ch/jira/browse/ATLPHYSVAL-505,MCGN,13000,mc16_13TeV
+9760,Single 50 GeV neutrino ATLFASTII sample for pileup on the fly tests,https://its.cern.ch/jira/browse/ATLMCPROD-3610,SIMU,13000,mc16_valid
+10662,tauCP priority 0+ request : mc16a re-reconstruction of Z->tau tau and DY-> tautau events,https://its.cern.ch/jira/browse/ATLMCPROD-4265,TAUP,13000,mc16_13TeV
+10398,Digi+Reco sample T,https://its.cern.ch/jira/browse/ATLMCPROD-3986,TRIG,13000,mc16_13TeV
+10663,tauCP priority 0+ request : mc16a re-reconstruction of Z->ee and DY-> ee events,https://its.cern.ch/jira/browse/ATLMCPROD-4266,TAUP,13000,mc16_13TeV
+11049,MC16a sheet 3,,MCGN,13000,mc16_13TeV
+11050,MC16a sheet 4,,MCGN,13000,mc16_13TeV
+11051,MC16a sheet 5,,MCGN,13000,mc16_13TeV
+11198,MC16a sheet 7,,MCGN,13000,mc16_13TeV
+10672,Priority 0+ re-reconstruction of single-particles with 21.0.14,https://its.cern.ch/jira/browse/ATLMCPROD-3736,EGAM,13000,mc16_13TeV
+11222,MC16a sheet 9,,MCGN,13000,mc16_13TeV
+10907,Samples T to test new Higgsino triggers,https://its.cern.ch/jira/browse/ATLMCPROD-4315,TRIG,13000,mc16_13TeV
+10664,tauCP priority 0+ request : mc16a re-reconstruction of gamma*->tautau training sample,https://its.cern.ch/jira/browse/ATLMCPROD-4267,TAUP,13000,mc16_13TeV
+10987,MC16a MUON start from evgen,https://its.cern.ch/jira/browse/ATLMCPROD-4340,MCGN,13000,mc16_13TeV
+11031,E/gamma Single particles with 21.0.16,https://its.cern.ch/jira/browse/ATLMCPROD-3736,EGAM,13000,mc16_13TeV
+10140,*urgent priority 0+* ttbar samples with full pileup truth at mu=60 and with MC16 and special ID conditions,https://its.cern.ch/jira/browse/ATLMCPROD-4011,IDTR,13000,mc16_valid
+11197,MC16a sheet 8,,MCGN,13000,mc16_13TeV
+10058,Updated Minbias samples for MC16,https://its.cern.ch/jira/browse/ATLMCPROD-3981,SIMU,13000,mc16_13TeV
+11000,ttbar MC16 samples with <mu>=60 and extra threshold points,https://its.cern.ch/jira/browse/ATLMCPROD-4346,IDTR,13000,mc16_13TeV
+11052,MC16a sheet 6,,MCGN,13000,mc16_13TeV
+10260,Single nu with full pile-up truth in MC16,https://its.cern.ch/jira/browse/ATLMCPROD-4158,IDTR,13000,mc16_13TeV
+10579,mc16 test 5 split mixed mc16 and mc15,,MCGN,13000,mc16_13TeV
+10580,Evgen for mc16 test 5 split mixed mc16 and mc15,,MCGN,13000,mc15_13TeV
+10666,tauCP priority 0+ request : mc16a re-reconstruction of dijet events,https://its.cern.ch/jira/browse/ATLMCPROD-4268,TAUP,13000,mc16_13TeV
+10986,MC16a EGAM save calibration hits,https://its.cern.ch/jira/browse/ATLMCPROD-4341,MCGN,13000,mc16_13TeV
+11034,MC16a sheet 1,https://its.cern.ch/jira/browse/ATLMCPROD-4337,MCGN,13000,mc16_13TeV
+11035,MC16a single particles,https://its.cern.ch/jira/browse/ATLMCPROD-4337,MCGN,13000,mc16_13TeV
+9671,tauCP priority 0+ request : mc16a simulation of gamma*->tautau training sample,https://its.cern.ch/jira/browse/ATLMCPROD-3838,TAUP,13000,mc16_13TeV
+11131,DAOD_IDTIDE of MC16 dijet samples with Geantino-only pileup truth,https://its.cern.ch/jira/browse/ATLMCPROD-4394,IDTR,13000,mc16_13TeV
+11133,ttbar samples with ID Special Test Configurations for Run 3 data taking (<mu>=80),https://its.cern.ch/jira/browse/ATLMCPROD-4380,IDTR,13000,mc16_13TeV
+9810,pre-MC16 A3 minbias,https://its.cern.ch/jira/browse/ATLMCPROD-3891,MCGN,13000,mc16_13TeV
+10959,"Evgen for Updated Minbias samples for MC16, 21.0.14",https://its.cern.ch/jira/browse/ATLPHYSVAL-505,VALI,13000,mc15_13TeV
+10989,Evgen for MC16a MUON start from evgen,https://its.cern.ch/jira/browse/ATLMCPROD-4340,MCGN,13000,mc15_13TeV
+11107,A new digi plus reco sample T for trigger group,https://its.cern.ch/jira/browse/ATLMCPROD-4331,TRIG,13000,mc16_13TeV
+11760,MinBias samples for Tracking Efficiency Material Systematics,https://its.cern.ch/jira/browse/ATLMCPROD-4595,IDTR,13000,mc16_13TeV
+12012,tauCP request: MC16a Systematic Sample - Different Physics List,https://its.cern.ch/jira/browse/ATLMCPROD-4684,TAUP,13000,mc16_13TeV
+11709,Production of Jpsi low pT (>2.5 GeV) for Rel21,https://its.cern.ch/jira/browse/ATLMCPROD-4603,MUON,13000,mc16_13TeV
+11692,MC16 ttbar sample with Pixel 30% endcap disabled,https://its.cern.ch/jira/browse/ATLMCPROD-4580,IDTR,13000,mc16_13TeV
+11855,MC16b HITS samples for FTK studies,https://its.cern.ch/jira/browse/ATLMCPROD-4636,TRIG,13000,mc16_13TeV
+11740,Special MinBias MC16 sample for Tracking Efficiency Physics List Systematics,https://its.cern.ch/jira/browse/ATLMCPROD-4606,IDTR,13000,mc16_13TeV
+11963,Single nu sample with wide pile-up range and full pile-up truth in final MC16 configuration,https://its.cern.ch/jira/browse/ATLMCPROD-4628,IDTR,13000,mc16_13TeV
+11920,ttbar MC16 sample with Final 2017 Endcap Pixel condition,https://its.cern.ch/jira/browse/ATLMCPROD-4647,IDTR,13000,mc16_13TeV
+11678,Min Bias Samples for Tracking Efficiency recommendations,https://its.cern.ch/jira/browse/ATLMCPROD-4587,IDTR,13000,mc16_13TeV
+12128,TauCP samples for MC16a - calibration hits samples for GammaTauTau,https://its.cern.ch/jira/browse/ATLMCPROD-4705,TAUP,13000,mc16_13TeV
+12014,tauCP request: MC16a Systematic Sample - Different generator configurations,https://its.cern.ch/jira/browse/ATLMCPROD-4686,TAUP,13000,mc16_13TeV
+11756,MC16 MinBias sample for Tracking Efficiency Pile-up Systematics study,https://its.cern.ch/jira/browse/ATLMCPROD-4610,IDTR,13000,mc16_13TeV
+11359,MC16a sheet 10,,MCGN,13000,mc16_13TeV
+11448,ttbar MC16 samples with <mu>=60 and extra Pixel analog threshold tuning for 2017,https://its.cern.ch/jira/browse/ATLMCPROD-4489,IDTR,13000,mc16_13TeV
+11869,reconstruction of single-particles with Release 21,https://its.cern.ch/jira/browse/ATLMCPROD-4537,EGAM,13000,mc16_13TeV
