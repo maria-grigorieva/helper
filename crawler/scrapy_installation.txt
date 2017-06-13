@@ -1,0 +1,25 @@
+1) pip install Scrapy
+
+AttributeError: 'module' object has no attribute 'OP_NO_TLSv1_1'
+
+2) trying to upgrade openssl
+
+check version
+
+>> openssl version -a
+
+OpenSSL 0.9.8zh 14 Jan 2016
+built on: Jan 23 2017
+platform: darwin64-x86_64-llvm
+options:  bn(64,64) md2(int) rc4(ptr,char) des(idx,cisc,16,int) blowfish(idx)
+compiler: -arch x86_64 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -fasm-blocks -O3 -D_REENTRANT -DDSO_DLFCN -DHAVE_DLFCN_H -DL_ENDIAN -DMD32_REG_T=int -DOPENSSL_NO_IDEA -DOPENSSL_PIC -DOPENSSL_THREADS -DZLIB -mmacosx-version-min=10.6
+OPENSSLDIR: "/System/Library/OpenSSL"
+
+
+backup:
+
+sudo mv /usr/bin/openssl /usr/bin/openssl-old
+
+Not permitted....
+
+
