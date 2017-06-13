@@ -1,0 +1,50 @@
+Mac OS Sierra
+
+1) curl -XGET localhost:9200/_cluster/health
+2) curl -XGET localhost:9200/_cluster/health?pretty
+{
+  "cluster_name" : "es_dkb",
+  "status" : "green",
+  "timed_out" : false,
+  "number_of_nodes" : 1,
+  "number_of_data_nodes" : 1,
+  "active_primary_shards" : 0,
+  "active_shards" : 0,
+  "relocating_shards" : 0,
+  "initializing_shards" : 0,
+  "unassigned_shards" : 0,
+  "delayed_unassigned_shards" : 0,
+  "number_of_pending_tasks" : 0,
+  "number_of_in_flight_fetch" : 0,
+  "task_max_waiting_in_queue_millis" : 0,
+  "active_shards_percent_as_number" : 100.0
+}
+
+3) install management utility X-Pack
+
+./elasticsearch-plugin install x-pack
+
+change user/password
+
+curl -XPUT -u elastic 'localhost:9200/_xpack/security/user/elastic/_password' -H "Content-Type: application/json" -d '{
+  "password" : "elasticpassword"
+}'
+
+default:
+elastic/changeme
+
+(source: https://www.elastic.co/guide/en/x-pack/current/security-getting-started.html)
+
+4) install kibana
+
+https://artifacts.elastic.co/downloads/kibana/kibana-5.4.1-darwin-x86_64.tar.gz
+>> tar -xzf ~/Downloads/kibana-5.4.1-darwin-x86_64.tar.gz
+
+5) install Kivana into X-Pack
+>> bin/kibana-plugin install x-pack
+
+6) start Kibana
+>> bin/kibana
+
+
+

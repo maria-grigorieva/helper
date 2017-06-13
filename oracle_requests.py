@@ -1,12 +1,8 @@
 import DButils
-import cx_Oracle
 import csv
 import time
 
-
-
-
-dsn ="atlas_deft_r/tasks4prsys_read@(DESCRIPTION=(ADDRESS= (PROTOCOL=TCP) (HOST=localhost) (PORT=10002) )(LOAD_BALANCE=on)(ENABLE=BROKEN)(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=adcr.cern.ch)(INSTANCE_NAME=ADCR1)))"
+dsn = "___ORACLE_DEFT_DSN___"
 conn, cursor = DButils.connectDEFT_DSN(dsn)
 
 __sql_get_campaign_subcampaign = "select * from t_prodmanager_request where lower(campaign) = 'mc16' and lower(sub_campaign) = 'mc16a'"
@@ -100,7 +96,7 @@ __sql_tag = "select * from atlas_deft.t_production_tag where rownum<=10"
 # print cursor.description
 #
 start = time.time()
-result = DButils.QueryAll(conn, __sql)
+result = DButils.QueryAll(conn, __sql_container)
 end = time.time()
 print "Query Execution time:"
 print(end - start)
@@ -108,8 +104,8 @@ print(end - start)
 for item in result:
     print item
 
-start = time.time()
-DButils.QueryToCSV(conn, __sql, "MC16_request_task_container_tag_hash_list.csv")
-end = time.time()
-print "Query Execution time:"
-print(end - start)
+# start = time.time()
+# DButils.QueryToCSV(conn, __sql, "MC16_request_task_container_tag_hash_list.csv")
+# end = time.time()
+# print "Query Execution time:"
+# print(end - start)
