@@ -1,0 +1,9 @@
+GET /atlas_documents/cds_glance/_search
+{
+     "_source": ["CDS.keywords", "dkbID"],
+    "query": {
+        "match": {
+            "CDS.keywords.term": "higgs"
+        }
+    }
+}

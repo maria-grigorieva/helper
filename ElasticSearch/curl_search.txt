@@ -1,0 +1,100 @@
+1) get all document in index
+curl -u elastic:changeme -GET 'http://localhost:9200/hashtag/_search?pretty'
+
+2) get all documents in index for current document type
+curl -u elastic:changeme -GET 'http://localhost:9200/hashtag/summary/_search?pretty'
+
+3) to increase the number of documents in ES response - use size=XXX
+curl -u elastic:changeme -GET 'http://localhost:9200/hashtag/summary/_search?pretty&size=50'
+
+4) retrieve a document
+curl -u elastic:changeme -GET 'http://localhost:9200/hashtag/summary/AVyrX2apXrSoZACjSPbL?pretty'
+
+{
+  "_index" : "hashtag",
+  "_type" : "summary",
+  "_id" : "AVyrX2apXrSoZACjSPbL",
+  "_version" : 1,
+  "found" : true,
+  "_source" : {
+    "restev" : 968000,
+    "step" : "Simul",
+    "finishedev" : 142484600,
+    "hashtag" : "Pythia8B"
+  }
+}
+
+
+5) retrieve a part of document
+curl -u elastic:changeme -GET 'http://localhost:9200/hashtag/summary/AVyrX2apXrSoZACjSPbL/_source=restev,finishedev?pretty'
+
+6) retrieve only document's source
+curl -u elastic:changeme -GET 'http://localhost:9200/hashtag/summary/AVyrX2apXrSoZACjSPbL/_source?pretty'
+
+7) check wheather a document exists
+curl -i -u elastic:changeme -XHEAD 'http://localhost:9200/hashtag/summary/AVyrX2apXrSoZACjSPbL'
+HTTP/1.1 200 OK
+
+curl -i -u elastic:changeme -XHEAD 'http://localhost:9200/hashtag/summary/wrong_ID'
+HTTP/1.1 404 Not Found
+
+8) Update document
+
+curl -u elastic:changeme -PUT 'http://localhost:9200/hashtag/summary/AVyrX2apXrSoZACjSPbL' -d '{"restev" : 968000,"step" : "Simul","finishedev" : 142484600,"hashtag" : "Pythia8B"}'
+
+{"_index":"hashtag",
+"_type":"summary",
+"_id":"AVyrX2apXrSoZACjSPbL",
+"_version":4,
+"result":"updated",
+"_shards":{"total":2,"successful":1,"failed":0},
+"created":false}
+
+Version number has changed:
+
+curl -u elastic:changeme -GET 'http://localhost:9200/hashtag/summary/AVyrX2apXrSoZACjSPbL?pretty'
+{
+  "_index" : "hashtag",
+  "_type" : "summary",
+  "_id" : "AVyrX2apXrSoZACjSPbL",
+  "_version" : 4,
+  "found" : true,
+  "_source" : {
+    "restev" : 968000,
+    "step" : "Simul",
+    "finishedev" : 142484600,
+    "hashtag" : "Pythia8B"
+  }
+}
+
+9) Create new Document with autogenerate ID with POST
+
+curl -i -u elastic:changeme -POST 'http://localhost:9200/hashtag/summary' -d '{"restev" : 100,"step" : "test_step","finishedev" : 100000,"hashtag" : "test"}'
+
+10) Create new Document with my ID using PUT
+
+curl -u elastic:changeme -PUT 'http://localhost:9200/hashtag/summary/newID/_create' -d '{"restev" : 100,"step" : "test_step","finishedev" : 100000,"hashtag" : "test"}'
+ OR
+curl -u elastic:changeme -PUT 'http://localhost:9200/hashtag/summary/newID?op_type=create' -d '{"restev" : 100,"step" : "test_step","finishedev" : 100000,"hashtag" : "test"}'
+
+11) Deleting a Document
+curl -i -u elastic:changeme -XDELETE 'http://localhost:9200/hashtag/summary/newID'
+
+12) Mapping
+curl -u elastic:changeme -XGET 'http://localhost:9200/atlas_documents/_mapping/cds_glance?pretty'
+
+13) reindex
+
+First copy the index to a new name
+POST /_reindex
+{
+  "source": {
+    "index": "twitter"
+  },
+  "dest": {
+    "index": "new_twitter"
+  }
+}
+
+Now delete the Index
+DELETE /twitter

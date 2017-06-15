@@ -1,3 +1,7 @@
+'''
+Class for web-scraping of BigpandaMonitor
+(implemented for the DKB)
+'''
 import urllib3
 import json
 import argparse

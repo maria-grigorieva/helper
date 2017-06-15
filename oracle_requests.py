@@ -86,7 +86,6 @@ __sql = "with hashtags as ( "\
         " ON h.taskid = a.taskid " \
         "ORDER BY campaign, subcampaign, phys_group, project, description, request, keywords, taskid, task_status, container_type, container_name"
 
-#and lower(r.sub_campaign) = 'mc16c'" \
 __sql_container = "select parent_tid, name from t_production_container where rownum <=10"
 __sql_tag = "select * from atlas_deft.t_production_tag where rownum<=10"
 
@@ -105,7 +104,7 @@ for item in result:
     print item
 
 # start = time.time()
-# DButils.QueryToCSV(conn, __sql, "MC16_request_task_container_tag_hash_list.csv")
+# DButils.QueryToCSV(conn, __sql, "XXX")
 # end = time.time()
 # print "Query Execution time:"
 # print(end - start)
