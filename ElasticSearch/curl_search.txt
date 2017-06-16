@@ -73,9 +73,9 @@ curl -i -u elastic:changeme -POST 'http://localhost:9200/hashtag/summary' -d '{"
 
 10) Create new Document with my ID using PUT
 
-curl -u elastic:changeme -PUT 'http://localhost:9200/hashtag/summary/newID/_create' -d '{"restev" : 100,"step" : "test_step","finishedev" : 100000,"hashtag" : "test"}'
+curl -u elastic:changeme -XPUT 'http://localhost:9200/hashtag/summary/newID/_create' -d '{"restev" : 100,"step" : "test_step","finishedev" : 100000,"hashtag" : "test"}'
  OR
-curl -u elastic:changeme -PUT 'http://localhost:9200/hashtag/summary/newID?op_type=create' -d '{"restev" : 100,"step" : "test_step","finishedev" : 100000,"hashtag" : "test"}'
+curl -u elastic:changeme -XPUT 'http://localhost:9200/hashtag/summary/newID?op_type=create' -d '{"restev" : 100,"step" : "test_step","finishedev" : 100000,"hashtag" : "test"}'
 
 11) Deleting a Document
 curl -i -u elastic:changeme -XDELETE 'http://localhost:9200/hashtag/summary/newID'
@@ -85,16 +85,22 @@ curl -u elastic:changeme -XGET 'http://localhost:9200/atlas_documents/_mapping/c
 
 13) reindex
 
+First we need to create a new index
+curl -u elastic:changeme -XPUT 'http://localhost:9200/dkb-summary?pretty'
+
+List of all indexes
+curl -u elastic:changeme -GET 'http://localhost:9200/_cat/indices?v'
+
 First copy the index to a new name
-POST /_reindex
-{
-  "source": {
-    "index": "twitter"
-  },
-  "dest": {
-    "index": "new_twitter"
-  }
-}
+curl -u elastic:changeme -POST 'http://localhost:9200/_reindex'
+-d {
+        "source": {
+            "index": "hashtag"
+        },
+        "dest": {
+            "index": "dkb-summary"
+        }
+    }
 
 Now delete the Index
 DELETE /twitter

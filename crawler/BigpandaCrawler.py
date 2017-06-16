@@ -11,6 +11,9 @@ class BigpandaCrawler:
     def __init__(self):
         self.args = self.parsingArguments()
         self.URL = self.args.url
+        self.http, self.resp = self.setConnectionInstance()
+
+    def setConnectionInstance(self):
         # PoolManager instance to make requests
         # This object handles all of the details of connection pooling
         try:
@@ -21,6 +24,10 @@ class BigpandaCrawler:
                 print('Connection failed.')
         except:
             print('Cannot create PoolManager instance')
+
+    def __init__(self, url):
+        self.URL = url
+        self.http, self.resp = self.setConnectionInstance()
 
     def parsingArguments(self):
         parser = argparse.ArgumentParser(description='Process command line arguments.')
