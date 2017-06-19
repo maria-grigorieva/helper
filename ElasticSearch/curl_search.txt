@@ -1,5 +1,5 @@
 1) get all document in index
-curl -u elastic:changeme -GET 'http://localhost:9200/hashtag/_search?pretty'
+curl -u elastic:changeme -GET 'http://localhost:9200/dkb-atlas-documents/_search?pretty'
 
 2) get all documents in index for current document type
 curl -u elastic:changeme -GET 'http://localhost:9200/hashtag/summary/_search?pretty'

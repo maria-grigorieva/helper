@@ -1,4 +1,4 @@
-from fileCatalogProcessing import FileCatalog
+from FilesProcessing import FileCatalog
 
 def main():
     catalog = FileCatalog()

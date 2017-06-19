@@ -6,26 +6,21 @@ import json
 class FileCatalog:
     'Common base class for all catalogs of files'
 
-    def __init__(self):
-        self.args = self.parsingArguments()
-        self.dir_name = self.args.i
+    def __init__(self, dir_name):
+        # self.args = self.parsingArguments()
+        # self.dir_name = self.args.i
+        self.dir_name = dir_name
 
-    def parsingArguments(self):
-        parser = argparse.ArgumentParser(description='Process command line arguments.')
-        parser.add_argument('--i', help='input directiry')
-        parser.add_argument('--o', help='output directory')
-        return parser.parse_args()
-
-    def files2string(self):
+    def getFilesList(self):
         return ' '.join(os.listdir(self.dir_name))
 
-    def files2json(self):
+    def getFileJSON(self):
         for filename in os.listdir(self.dir_name):
             file_handle = open(self.dir_name + '/' + filename, 'r')
             print filename
             yield json.load(file_handle)
 
-    def parameterSearch(self, data, params_list):
+    def getJSONParameter(self, data, params_list):
         for item in params_list:
             if isinstance(data, list):
                 for x in data:
@@ -45,10 +40,12 @@ class FileCatalog:
                         data = self.parameterSearch(data, params_list)
             return data
 
-    def searchParameterByType(self, data, params_list, type):
-        parameter = self.parameterSearch(data, params_list)
+    def getParamByType(self, data, params_list, type):
+        parameter = self.getJSONParameter(data, params_list)
         if isinstance(parameter, type):
             return parameter
+        else:
+            return False
 
     def searchString(self, data, lookup):
         for key, value in data.items():
