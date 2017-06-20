@@ -32,21 +32,7 @@ def main():
     else:
         es = Elasticsearch([HOST+':'+PORT])
 
-    # writeToFile('mapping.json', prettyJSON(es.indices.get_mapping("atlas-documents", "cds-glance"), 4))
-
-    # es = Elasticsearch(['localhost:9200'], http_auth=('elastic', 'changeme'))
-    #es.indices.delete("atlas-documents")
-    #user_mapping = readJSONFromFile('mapping_.json', 'dkb-atlas-documents')
-    #print user_mapping
-    #es.indices.create(index="atlas-documents", body=user_mapping)
-    # print prettyJSON(es.indices.get_mapping("atlas-documents"), 4)
     index_altas_documents("atlas-documents", "cds-glance", es, 1)
-    # removeIndex("dkb-atlas-documents", es)
-    #print json.dumps(es.indices.get_mapping("dkb-atlas-documents", "cds-glance"), indent=4, sort_keys=True)
-    # index_monitor_summary("dkb-summary", "campaign", es)
-    # removeIndex("dkb-atlas-documents", es)
-    # removeIndex("atlas_documents", es)
-    # print es.indices.exists(['atlas_documents'])
 
 def prettyJSON(json_str, indent=4):
     return json.dumps(json_str, indent=indent, sort_keys=True)
@@ -83,31 +69,31 @@ def parsingArguments():
 def create_index(index, es):
     es.indices.create(index=index, ignore=400)
 
-def index_altas_documents(index, doc_type, es, num):
+def index_altas_documents(index, doc_type, doc_id, es, limit):
     """
     Indexing ATLAS Documents metadata in the ElasticSearch
     :param index: name of ES index
     :param doc_type: document type of the ES index
     :param es: ElasticSearch instance
+    :param limit: number of records to process 
     :return:
     """
     catalog = FileCatalog(INPUT)
-    json_data = catalog.getFileJSON()
-    operation_timestamp = datetime.datetime.now()
 
-    for index, item in enumerate(json_data):
-        doc_id = item.get('dkbID')
+    # set current time for indexing operation
+    curr_tstamp = datetime.datetime.now()
+
+    for index, item in enumerate(catalog.filesGenerator()):
         try:
             res = es.index(
                 index=index,
                 doc_type=doc_type,
                 body=item,
-                id=doc_id,
+                id=item.get(doc_id),
                 op_type="create",
-                timestamp=operation_timestamp)
-
+                timestamp=curr_tstamp)
             pprint.pprint(res)
-            if index == num:
+            if index == limit:
                 break
         except ConflictError as e:
             print('Document already exists')

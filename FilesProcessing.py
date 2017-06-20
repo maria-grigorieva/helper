@@ -7,14 +7,12 @@ class FileCatalog:
     'Common base class for all catalogs of files'
 
     def __init__(self, dir_name):
-        # self.args = self.parsingArguments()
-        # self.dir_name = self.args.i
         self.dir_name = dir_name
 
     def getFilesList(self):
         return ' '.join(os.listdir(self.dir_name))
 
-    def getFileJSON(self):
+    def filesGenerator(self):
         for filename in os.listdir(self.dir_name):
             file_handle = open(self.dir_name + '/' + filename, 'r')
             print filename
