@@ -6,6 +6,7 @@ import json
 from FilesProcessing import FileCatalog
 from crawler.BigpandaCrawler import BigpandaCrawler
 import argparse
+import datetime
 
 def main():
     args = parsingArguments()
@@ -15,27 +16,58 @@ def main():
     if (args.input):
         global INPUT
         INPUT = args.input
-    global HOST
-    HOST = args.host
-    global PORT
-    PORT = args.port
-    global USER
-    USER = args.user
-    global PWD
-    PWD = args.pwd
-    es = Elasticsearch([HOST+':'+PORT], http_auth=(USER, PWD))
-    # es = Elasticsearch(['localhost:9200'], http_auth=('elastic', 'changeme'))
-    # create_index("dkb-atlas-documents", es)
-    # index_altas_documents("dkb-atlas-documents", "cds-glance", es)
+    if (args.host):
+        global HOST
+        HOST = args.host
+    if (args.port):
+        global PORT
+        PORT = args.port
+    if (args.user and args.pwd):
+        global USER
+        USER = args.user
+        global PWD
+        PWD = args.pwd
+    if (args.user and args.pwd):
+        es = Elasticsearch([HOST+':'+PORT], http_auth=(USER, PWD))
+    else:
+        es = Elasticsearch([HOST+':'+PORT])
 
+    # writeToFile('mapping.json', prettyJSON(es.indices.get_mapping("atlas-documents", "cds-glance"), 4))
+
+    # es = Elasticsearch(['localhost:9200'], http_auth=('elastic', 'changeme'))
+    #es.indices.delete("atlas-documents")
+    #user_mapping = readJSONFromFile('mapping_.json', 'dkb-atlas-documents')
+    #print user_mapping
+    #es.indices.create(index="atlas-documents", body=user_mapping)
+    # print prettyJSON(es.indices.get_mapping("atlas-documents"), 4)
+    index_altas_documents("atlas-documents", "cds-glance", es, 1)
+    # removeIndex("dkb-atlas-documents", es)
     #print json.dumps(es.indices.get_mapping("dkb-atlas-documents", "cds-glance"), indent=4, sort_keys=True)
     # index_monitor_summary("dkb-summary", "campaign", es)
     # removeIndex("dkb-atlas-documents", es)
     # removeIndex("atlas_documents", es)
-    print es.indices.exists(['atlas_documents'])
+    # print es.indices.exists(['atlas_documents'])
 
-def prettyJSON(json_str, indent):
+def prettyJSON(json_str, indent=4):
     return json.dumps(json_str, indent=indent, sort_keys=True)
+
+def readJSONFromFile(filename, field):
+    with open(filename, 'r') as file_content:
+        data = json.load(file_content)
+        try:
+            return data[field]
+        except KeyError as e:
+            print "KeyError " + e.message
+
+def writeToFile(filename, content):
+    try:
+        file_handle = open(filename, 'w')
+    except IOError as e:
+        print 'cannot open', filename
+        raise
+    file_handle.write(content)
+    file_handle.close()
+
 
 def parsingArguments():
     parser = argparse.ArgumentParser(description='Process command line arguments.')
@@ -51,7 +83,7 @@ def parsingArguments():
 def create_index(index, es):
     es.indices.create(index=index, ignore=400)
 
-def index_altas_documents(index, doc_type, es):
+def index_altas_documents(index, doc_type, es, num):
     """
     Indexing ATLAS Documents metadata in the ElasticSearch
     :param index: name of ES index
@@ -61,11 +93,22 @@ def index_altas_documents(index, doc_type, es):
     """
     catalog = FileCatalog(INPUT)
     json_data = catalog.getFileJSON()
-    for item in json_data:
+    operation_timestamp = datetime.datetime.now()
+
+    for index, item in enumerate(json_data):
         doc_id = item.get('dkbID')
         try:
-            res = es.index(index=index, doc_type=doc_type, body=item, id=doc_id, op_type='create')
+            res = es.index(
+                index=index,
+                doc_type=doc_type,
+                body=item,
+                id=doc_id,
+                op_type="create",
+                timestamp=operation_timestamp)
+
             pprint.pprint(res)
+            if index == num:
+                break
         except ConflictError as e:
             print('Document already exists')
 
@@ -80,11 +123,15 @@ def index_monitor_summary(index, doc_type, es):
     crawler = BigpandaCrawler(INPUT)
     data = crawler.getData()
     documents = crawler.docGenerator()
+    operation_timestamp = datetime.datetime.now()
 
     for doc in documents:
         print doc
         try:
-            res = es.index(index=index, doc_type=doc_type, body=doc)
+            res = es.index(index=index,
+                           doc_type=doc_type,
+                           body=doc,
+                           timestamp=operation_timestamp)
         except ConflictError as e:
             print('Document already exists')
 

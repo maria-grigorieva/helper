@@ -24,6 +24,24 @@ def main():
     else:
         es = Elasticsearch([HOST+':'+PORT])
     print es
+    print es.cluster.health()
+
+def create_index(index, es):
+    es.indices.create(index=index, ignore=400)
+
+def removeIndex(index, es):
+    try:
+        res = es.indices.delete(index=index, ignore=[400, 404])
+        print('Index ' + index + 'has beend removed from ElasticSearch')
+    except:
+        print('Index could not be deleted')
+
+
+def putDocIntoIndex(doc, index, doc_type, es, doc_content):
+    try:
+        res = es.index(index=index, doc_type=doc_type, body=doc_content, op_type='create')
+    except ConflictError as e:
+        print('Document already exists')
 
 
 def parsingArguments():
