@@ -1,8 +1,11 @@
 import DButils
 import csv
 import time
+import ConfigParser
 
-dsn = "___ORACLE_DEFT_DSN___"
+Config = ConfigParser.ConfigParser()
+Config.read("settings.cfg")
+dsn = Config.get("oracle", "dsn")
 conn, cursor = DButils.connectDEFT_DSN(dsn)
 
 __sql_get_campaign_subcampaign = "select * from t_prodmanager_request where lower(campaign) = 'mc16' and lower(sub_campaign) = 'mc16a'"
@@ -88,14 +91,15 @@ __sql = "with hashtags as ( "\
 
 __sql_container = "select parent_tid, name from t_production_container where rownum <=10"
 __sql_tag = "select * from atlas_deft.t_production_tag where rownum<=10"
-
+__sql_TASKS_PROD_AGGREGATE = "select * from ATLAS_PANDABIGMON.TASKS_PROD_AGGREGATE where rownum<=100";
+__sql_TASKS_PROD_AGGREGATE_COUNTER = "select count(*) from ATLAS_PANDABIGMON.TASKS_PROD_AGGREGATE";
 # __sql_get_tasks_for_request = "select * from t_production_task where pr_id = 12304"
 
 # cursor.execute(__sql_tag)
 # print cursor.description
 #
 start = time.time()
-result = DButils.QueryAll(conn, __sql_container)
+result = DButils.QueryAll(conn, __sql_TASKS_PROD_AGGREGATE)
 end = time.time()
 print "Query Execution time:"
 print(end - start)
@@ -104,7 +108,7 @@ for item in result:
     print item
 
 # start = time.time()
-# DButils.QueryToCSV(conn, __sql, "XXX")
+# DButils.QueryToCSV(conn, __sql_TASKS_PROD_AGGREGATE, "__sql_TASKS_PROD_AGGREGATE.csv")
 # end = time.time()
 # print "Query Execution time:"
 # print(end - start)
