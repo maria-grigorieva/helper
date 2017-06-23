@@ -4,6 +4,7 @@ import sys
 import datetime
 import traceback
 import csv
+import json
 
 try:
     import cx_Oracle
@@ -41,6 +42,17 @@ def QueryToCSV(connection, query, filename):
         writer = csv.writer(fout)
         writer.writerow([i[0] for i in cursor.description])  # heading row
         writer.writerows(cursor.fetchall())
+
+def CSV2JSON(csv_file, json_file):
+    csv_file_handler = open(csv_file, 'r')
+    json_file_handler = open(json_file, 'w')
+    reader = csv.DictReader(csv_file_handler)
+    json_file_handler.write('[')
+    for row in reader:
+        json.dump(row, json_file_handler)
+        json_file_handler.write(',')
+        json_file_handler.write('\n')
+    json_file_handler.write(']')
 
 def QueryUpdate(connection, query):
     error = 0

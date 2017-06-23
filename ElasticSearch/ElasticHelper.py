@@ -3,7 +3,7 @@ from elasticsearch.exceptions import ConflictError
 import pprint
 import sys
 import json
-from FilesProcessing import FileCatalog
+from FilesProcessing import InputData
 from crawler.BigpandaCrawler import BigpandaCrawler
 import argparse
 import datetime
@@ -32,7 +32,7 @@ def main():
     else:
         es = Elasticsearch([HOST+':'+PORT])
 
-    index_altas_documents("atlas-documents", "cds-glance", es, 1)
+    #index_altas_documents("atlas-documents", "cds-glance", es, 1)
 
 def prettyJSON(json_str, indent=4):
     return json.dumps(json_str, indent=indent, sort_keys=True)
@@ -78,7 +78,7 @@ def index_altas_documents(index, doc_type, doc_id, es, limit):
     :param limit: number of records to process 
     :return:
     """
-    catalog = FileCatalog(INPUT)
+    catalog = InputData('d', INPUT)
 
     # set current time for indexing operation
     curr_tstamp = datetime.datetime.now()
@@ -120,6 +120,10 @@ def index_monitor_summary(index, doc_type, es):
                            timestamp=operation_timestamp)
         except ConflictError as e:
             print('Document already exists')
+
+#
+# def index_json_file(json_file, index, doc_type, es):
+#
 
 
 def removeIndex(index, es):

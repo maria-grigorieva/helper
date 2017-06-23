@@ -93,22 +93,61 @@ __sql_container = "select parent_tid, name from t_production_container where row
 __sql_tag = "select * from atlas_deft.t_production_tag where rownum<=10"
 __sql_TASKS_PROD_AGGREGATE = "select * from ATLAS_PANDABIGMON.TASKS_PROD_AGGREGATE where rownum<=100";
 __sql_TASKS_PROD_AGGREGATE_COUNTER = "select count(*) from ATLAS_PANDABIGMON.TASKS_PROD_AGGREGATE";
-# __sql_get_tasks_for_request = "select * from t_production_task where pr_id = 12304"
 
-# cursor.execute(__sql_tag)
-# print cursor.description
+
+__sql_for_es = '''
+    select
+        lower(t.campaign) as campaign,
+        lower(t.subcampaign) as subcampaing,
+        t.phys_group as phys_group,
+        t.project as project,
+        substr(t.taskname, instrc(t.taskname,'.',1,3)+1,instrc(t.taskname,'.',1,4)-instrc(t.taskname,'.',1,3)-1) as step,
+        t.pr_id as request,
+        t.status as status,
+        t.taskid as task_id,
+        t.taskname as taskname,
+        listagg(hashtag.hashtag,
+        ',') within
+    group (order by
+        ht_t.taskid) as hashtag_list,
+        t.total_events as events_total,
+        t.total_req_events as t_events_requested,
+        t.timestamp as t_stamp
+    FROM
+        t_production_task t,
+        atlas_deft.t_ht_to_task ht_t,
+        atlas_deft.t_hashtag hashtag
+    WHERE
+        t.taskid = ht_t.taskid
+        and ht_t.ht_id = hashtag.ht_id
+        and lower(t.campaign) = 'mc16'
+        and lower(t.subcampaign) = 'mc16a'
+    GROUP BY
+        lower(t.campaign),
+        lower(t.subcampaign),
+        t.phys_group,
+        t.project,
+        substr(t.taskname, instrc(t.taskname,'.',1,3)+1,instrc(t.taskname,'.',1,4)-instrc(t.taskname,'.',1,3)-1),
+        t.pr_id,
+        t.status,
+        t.taskid,
+        t.taskname,
+        t.total_events,
+        t.total_req_events,
+        t.timestamp
+'''
+
+# start = time.time()
+# result = DButils.QueryAll(conn, __sql_for_es)
+# end = time.time()
 #
+# for item in result:
+#     print item
+# print "Query Execution time:"
+# print(end - start)
 start = time.time()
-result = DButils.QueryAll(conn, __sql_TASKS_PROD_AGGREGATE)
+# DButils.QueryToCSV(conn, __sql_for_es, "__sql_for_es.csv")
+DButils.CSV2JSON("__sql_for_es.csv", "__sql_for_es.json")
 end = time.time()
 print "Query Execution time:"
 print(end - start)
-
-for item in result:
-    print item
-
-# start = time.time()
-# DButils.QueryToCSV(conn, __sql_TASKS_PROD_AGGREGATE, "__sql_TASKS_PROD_AGGREGATE.csv")
-# end = time.time()
-# print "Query Execution time:"
-# print(end - start)

@@ -3,11 +3,14 @@ import os
 import argparse
 import json
 
-class FileCatalog:
-    'Common base class for all catalogs of files'
+class InputData:
+    'Common base class for file/dir inputs'
 
-    def __init__(self, dir_name):
-        self.dir_name = dir_name
+    def __init__(self, input):
+        if os.path.isdir(input):
+            self.processor = CatalogProcessing(input)
+        elif os.path.isfile(input):
+            self.processor = FileProcessing(input)
 
     def getFilesList(self):
         return ' '.join(os.listdir(self.dir_name))
@@ -17,6 +20,15 @@ class FileCatalog:
             file_handle = open(self.dir_name + '/' + filename, 'r')
             print filename
             yield json.load(file_handle)
+
+    def json_item_generator(self, json_file):
+        with open(json_file, 'r') as file_content:
+            data = json.load(file_content)
+            if isinstance(data, list):
+                for item in data:
+                    yield item
+            else:
+                yield data
 
     def getJSONParameter(self, data, params_list):
         for item in params_list:
@@ -50,3 +62,25 @@ class FileCatalog:
             for v in value:
                 if lookup in v:
                     return key
+
+
+class CatalogProcessing():
+
+    def __init__(self, input):
+        self.input = input
+
+    def get_files_list(self):
+        return ' '.join(os.listdir(self.input))
+
+    def files_generator(self):
+        for filename in os.listdir(self.input):
+            file_handle = open(self.input + '/' + filename, 'r')
+            print filename
+            yield json.load(file_handle)
+
+class FileProcessing(InputData):
+
+    def __init__(self, input):
+        self.input = input
+
+
