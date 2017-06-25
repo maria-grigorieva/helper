@@ -2,10 +2,12 @@ import DButils
 import csv
 import time
 import ConfigParser
+from DocumentProcessing import FileConnector
 
 Config = ConfigParser.ConfigParser()
 Config.read("settings.cfg")
 dsn = Config.get("oracle", "dsn")
+print dsn
 conn, cursor = DButils.connectDEFT_DSN(dsn)
 
 __sql_get_campaign_subcampaign = "select * from t_prodmanager_request where lower(campaign) = 'mc16' and lower(sub_campaign) = 'mc16a'"
@@ -137,8 +139,239 @@ __sql_for_es = '''
         t.timestamp
 '''
 
+
+__sql_for_es_containers = '''
+    select
+        lower(t.campaign) as campaign,
+        lower(t.subcampaign) as subcampaing,
+        t.phys_group as phys_group,
+        t.project as project,
+        substr(t.taskname, instrc(t.taskname,'.',1,3)+1,instrc(t.taskname,'.',1,4)-instrc(t.taskname,'.',1,3)-1) as step,
+        t.pr_id as request,
+        t.status as status,
+        t.taskid as task_id,
+        t.taskname as taskname,
+        listagg(hashtag.hashtag,
+        ',') within
+    group (order by
+        ht_t.taskid) as hashtag_list,
+        tag.name as tag_name, 
+        tag.trf_name as trf_name, 
+        tag.trf_release as trf_release
+    FROM
+        t_production_task t,
+        atlas_deft.t_ht_to_task ht_t,
+        atlas_deft.t_hashtag hashtag,
+        atlas_deft.t_production_tag tag
+    WHERE
+        t.taskid = ht_t.taskid
+        and ht_t.ht_id = hashtag.ht_id
+        and lower(t.campaign) = 'mc16'
+        and lower(t.subcampaign) = 'mc16a'
+        and tag.taskid = t.taskid
+    GROUP BY
+        lower(t.campaign),
+        lower(t.subcampaign),
+        t.phys_group,
+        t.project,
+        substr(t.taskname, instrc(t.taskname,'.',1,3)+1,instrc(t.taskname,'.',1,4)-instrc(t.taskname,'.',1,3)-1),
+        t.pr_id,
+        t.status,
+        t.taskid,
+        t.taskname,
+        tag.name,
+        tag.trf_name,
+        tag.trf_release
+'''
+
+
+__hashtag_request = '''
+    with 
+        hashtags as (
+          select 
+            taskid, 
+            LISTAGG(hashtag.hashtag, ', ') 
+              within group (order by ht_t.taskid) as hashtag_list
+          from atlas_deft.t_ht_to_task ht_t, atlas_deft.t_hashtag hashtag where hashtag.ht_id=ht_t.ht_id
+          GROUP BY taskid
+        ), 
+        requests as (
+            select 
+              r.pr_id, 
+              r.description, 
+              r.reference_link, 
+              r.phys_group, 
+              r.energy_gev, 
+              r.project,
+              t.taskid
+            from 
+              t_prodmanager_request r, 
+              t_production_task t
+            where 
+              r.pr_id = t.pr_id 
+              and lower(t.campaign) = 'mc16'
+              and lower(t.subcampaign) = 'mc16a'
+        )
+        select 
+          r.pr_id,
+          r.description, 
+          r.reference_link, 
+          r.phys_group, 
+          r.energy_gev, 
+          r.project,
+          r.taskid,
+          h.hashtag_list
+        from 
+          requests r
+          LEFT JOIN
+          hashtags h
+          ON h.taskid = r.taskid
+        group by 
+          r.pr_id,
+          r.description, 
+          r.reference_link, 
+          r.phys_group, 
+          r.energy_gev, 
+          r.project,
+          r.taskid,
+          h.hashtag_list
+'''
+
+
+__hashtag_request_task = '''
+    with 
+        hashtags as (
+          select 
+            taskid, 
+            LISTAGG(hashtag.hashtag, ', ') 
+              within group (order by ht_t.taskid) as hashtag_list
+          from atlas_deft.t_ht_to_task ht_t, atlas_deft.t_hashtag hashtag where hashtag.ht_id=ht_t.ht_id
+          GROUP BY taskid
+        ), 
+        requests as (
+            select 
+              r.pr_id, 
+              r.description, 
+              r.reference_link, 
+              r.phys_group, 
+              r.energy_gev, 
+              r.project,
+              substr(t.taskname, instrc(t.taskname,'.',1,3)+1,instrc(t.taskname,'.',1,4)-instrc(t.taskname,'.',1,3)-1) as step,
+              t.taskid,
+              t.taskname,
+              t.status,
+              t.timestamp
+            from 
+              t_prodmanager_request r, 
+              t_production_task t
+            where 
+              r.pr_id = t.pr_id 
+              and lower(t.campaign) = 'mc16'
+              and lower(t.subcampaign) = 'mc16a'
+        )
+        select 
+          r.pr_id,
+          r.description, 
+          r.reference_link, 
+          r.phys_group, 
+          r.energy_gev, 
+          r.project,
+          r.step,
+          r.taskid,
+          r.status,
+          r.timestamp,
+          h.hashtag_list
+        from 
+          requests r
+          LEFT JOIN
+          hashtags h
+          ON h.taskid = r.taskid
+        group by 
+          r.pr_id,
+          r.description, 
+          r.reference_link, 
+          r.phys_group, 
+          r.energy_gev, 
+          r.project,
+          r.step,
+          r.taskid,
+          r.status,
+          r.timestamp,
+          h.hashtag_list
+'''
+
+__hashtag_request_task_data_container = '''
+    with 
+        hashtags as (
+          select 
+            taskid, 
+            LISTAGG(hashtag.hashtag, ', ') 
+              within group (order by ht_t.taskid) as hashtag_list
+          from atlas_deft.t_ht_to_task ht_t, atlas_deft.t_hashtag hashtag where hashtag.ht_id=ht_t.ht_id
+          GROUP BY taskid
+        ), 
+        requests as (
+            select 
+              r.pr_id as request_id, 
+              r.description, 
+              r.reference_link, 
+              r.phys_group, 
+              r.energy_gev, 
+              r.project,
+              substr(t.taskname, instrc(t.taskname,'.',1,3)+1,instrc(t.taskname,'.',1,4)-instrc(t.taskname,'.',1,3)-1) as step,
+              t.taskid,
+              t.taskname,
+              t.status,
+              t.timestamp,
+              container.name as container_name,
+              substr(container.name, instrc (container.name,'.',1,4)+1,instrc(container.name,'.',1,5)-instrc(container.name,'.',1,4)-1) as container_type
+            from 
+              t_prodmanager_request r, 
+              t_production_task t,
+              t_production_container container
+            where 
+              r.pr_id = t.pr_id 
+              and t.taskid = container.parent_tid
+              and lower(t.campaign) = 'mc16'
+              and lower(t.subcampaign) = 'mc16a'
+        )
+        select 
+          r.request_id,
+          r.description, 
+          r.reference_link, 
+          r.phys_group, 
+          r.energy_gev, 
+          r.project,
+          r.step,
+          r.taskid,
+          r.status,
+          r.timestamp,
+          r.container_name, 
+          r.container_type,
+          h.hashtag_list
+        from 
+          requests r
+          LEFT JOIN
+          hashtags h
+          ON h.taskid = r.taskid
+        group by 
+          r.request_id,
+          r.description, 
+          r.reference_link, 
+          r.phys_group, 
+          r.energy_gev, 
+          r.project,
+          r.step,
+          r.taskid,
+          r.status,
+          r.timestamp,
+          r.container_name, 
+          r.container_type,
+          h.hashtag_list
+'''
+
 # start = time.time()
-# result = DButils.QueryAll(conn, __sql_for_es)
+# result = DButils.QueryAll(conn, __hashtag_request_task_data_container)
 # end = time.time()
 #
 # for item in result:
@@ -146,8 +379,8 @@ __sql_for_es = '''
 # print "Query Execution time:"
 # print(end - start)
 start = time.time()
-# DButils.QueryToCSV(conn, __sql_for_es, "__sql_for_es.csv")
-DButils.CSV2JSON("__sql_for_es.csv", "__sql_for_es.json")
+DButils.QueryToCSV(conn, __hashtag_request_task_data_container, "hashtag_request_task_data_container.csv")
+DButils.CSV2JSON("hashtag_request_task_data_container.csv", "hashtag_request_task_data_container.json")
 end = time.time()
 print "Query Execution time:"
 print(end - start)
