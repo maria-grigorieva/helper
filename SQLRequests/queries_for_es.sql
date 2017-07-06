@@ -814,3 +814,22 @@ with mc16a_tasks as (
     order by
       phys_category,
       step_name;
+
+-- analyze events in task chain
+select
+  t.taskid,
+  t.total_events,
+  t.total_req_events,
+  jd.nevents,
+  jd.neventsused,
+  jd.datasetid
+from
+  ATLAS_DEFT.t_production_task t,
+  ATLAS_PANDA.jedi_datasets jd
+where
+  t.taskid = jd.jeditaskid
+  and jd.type in ('input')
+    AND jd.masterid IS NULL
+  and t.taskid in (10730520, 11190000, 11190002, 11326868, 11326870)
+order by
+  t.taskid;
