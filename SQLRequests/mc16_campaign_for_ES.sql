@@ -1,5 +1,6 @@
 with mc16a_tasks as (
     select
+      t.campaign,
       t.taskid,
       t.step_id,
       t.taskname,
@@ -21,6 +22,7 @@ with mc16a_tasks as (
 ),
   task_hashtags as (
       SELECT
+        t.campaign,
         t.subcampaign,
         t.phys_group,
         t.project,
@@ -47,6 +49,7 @@ with mc16a_tasks as (
         and t.step_id = s.step_id
         and s.step_t_id = s_t.step_t_id
       GROUP BY
+        t.campaign,
         t.subcampaign,
         t.phys_group,
         t.project,
@@ -61,6 +64,7 @@ with mc16a_tasks as (
   ),
   phys_categories as (
     select
+      campaign,
       subcampaign,
       phys_group,
       project,
@@ -119,6 +123,7 @@ with mc16a_tasks as (
       REGEXP_LIKE(lower(hashtag_list), '(*)((mc16[a-z]?)|(mc16[a-z]?_cp)|(mc16[a-z]?_trig)|(mc16[a-z]?_hpc)|(mc16[a-z]?_pc)|(mc16[a-z]?campaign))(*)')
   )
       SELECT
+        t.campaign,
         t.subcampaign,
         t.phys_group,
         t.project,
