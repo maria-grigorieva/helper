@@ -78,49 +78,49 @@ with mc16a_tasks as (
       energy_gev,
       hashtag_list,
       CASE
-        WHEN REGEXP_LIKE(lower(hashtag_list), '(*)(charmonium|jpsi|bs|bd|bminus|bplus|charm|bottom|bottomonium|b0)+(*)')
+        WHEN REGEXP_LIKE(lower(hashtag_list), '(charmonium|jpsi|bs|bd|bminus|bplus|charm|bottom|bottomonium|b0)')
         THEN 'BPhysics'
-        WHEN REGEXP_LIKE(lower(hashtag_list), '(*)btagging(*)')
+        WHEN REGEXP_LIKE(lower(hashtag_list), '(btagging)')
         THEN 'BTag'
-        WHEN REGEXP_LIKE(lower(hashtag_list), '(*)(diboson|zz|ww"|wz|wwbb|wwll)(*)')
+        WHEN REGEXP_LIKE(lower(hashtag_list), '(diboson|zz|ww|wz|wwbb|wwll)')
         THEN 'Diboson'
-        WHEN REGEXP_LIKE(lower(hashtag_list), '(*)(drellyan|dy)(*)')
+        WHEN REGEXP_LIKE(lower(hashtag_list), '(drellyan|dy)')
         THEN 'DrellYan'
-        WHEN REGEXP_LIKE(lower(hashtag_list), '(*)(exotic|monojet|blackhole|technicolor|randallsundrum|wprime|zprime|magneticmonopole|extradimensions|warpeded|contactinteraction|seesaw)(*)')
+        WHEN REGEXP_LIKE(lower(hashtag_list), '(exotic|monojet|blackhole|technicolor|randallsundrum|wprime|zprime|magneticmonopole|extradimensions|warpeded|contactinteraction|seesaw)')
         THEN 'Exotic'
-        WHEN REGEXP_LIKE(lower(hashtag_list), '(*)(photon|diphoton)(*)')
+        WHEN REGEXP_LIKE(lower(hashtag_list), '(photon|diphoton)')
         THEN 'GammaJets'
-        WHEN REGEXP_LIKE(lower(hashtag_list), '(*)(vbf|higgs|mh125|zhiggs|whiggs|bsmhiggs|chargedhiggs|bsmhiggs|smhiggs)(*)')
+        WHEN REGEXP_LIKE(lower(hashtag_list), '(vbf|higgs|mh125|zhiggs|whiggs|bsmhiggs|chargedhiggs|bsmhiggs|smhiggs)')
         THEN 'Higgs'
-        WHEN REGEXP_LIKE(lower(hashtag_list), '(*)(minBias|minbias)(*)')
+        WHEN REGEXP_LIKE(lower(hashtag_list), '(minbias)')
         THEN 'Minbias'
-        WHEN REGEXP_LIKE(lower(hashtag_list), '(*)(dijet|multijet|qcd)(*)')
+        WHEN REGEXP_LIKE(lower(hashtag_list), '(dijet|multijet|qcd)')
         THEN 'Multijet'
-        WHEN REGEXP_LIKE(lower(hashtag_list), '(*)(performance)(*)')
+        WHEN REGEXP_LIKE(lower(hashtag_list), '(performance)')
         THEN 'Performance'
-        WHEN REGEXP_LIKE(lower(hashtag_list), '(*)(singleparticle)(*)')
+        WHEN REGEXP_LIKE(lower(hashtag_list), '(singleparticle)')
         THEN 'SingleParticle'
-        WHEN REGEXP_LIKE(lower(hashtag_list), '(*)(singletop)(*)')
+        WHEN REGEXP_LIKE(lower(hashtag_list), '(singletop)')
         THEN 'SingleTop'
-        WHEN REGEXP_LIKE(lower(hashtag_list), '(*)(bino|susy|pmssm|leptosusy|rpv|mssm)(*)')
+        WHEN REGEXP_LIKE(lower(hashtag_list), '(bino|susy|pmssm|leptosusy|rpv|mssm)')
         THEN 'SUSY'
-        WHEN REGEXP_LIKE(lower(hashtag_list), '(*)(triboson|triplegaugecoupling|zzw|www)(*)')
+        WHEN REGEXP_LIKE(lower(hashtag_list), '(triboson|triplegaugecoupling|zzw|www)')
         THEN 'Triboson'
-        WHEN REGEXP_LIKE(lower(hashtag_list), '(*)(ttbar)(*)')
+        WHEN REGEXP_LIKE(lower(hashtag_list), '(ttbar)')
         THEN 'TTbar'
-        WHEN REGEXP_LIKE(lower(hashtag_list), '(*)(ttw|ttz|ttv|ttvv|4top)(*)')
+        WHEN REGEXP_LIKE(lower(hashtag_list), '(ttw|ttz|ttv|ttvv|4top)')
         THEN 'TTbarX'
-        WHEN REGEXP_LIKE(lower(hashtag_list), '(*)(upgrad)(*)')
+        WHEN REGEXP_LIKE(lower(hashtag_list), '(upgrad)')
         THEN 'Upgrade'
-        WHEN REGEXP_LIKE(lower(hashtag_list), '(*)(w)(*)')
+        WHEN REGEXP_LIKE(lower(hashtag_list), '(w)')
         THEN 'Wjets'
-        WHEN REGEXP_LIKE(lower(hashtag_list), '(*)(z)(*)')
+        WHEN REGEXP_LIKE(lower(hashtag_list), '(z)')
         THEN 'Zjets'
       ELSE 'Uncategorized'
       END as phys_category
     from task_hashtags
     where
-      REGEXP_LIKE(lower(hashtag_list), '(*)((mc16[a-z]?)|(mc16[a-z]?_cp)|(mc16[a-z]?_trig)|(mc16[a-z]?_hpc)|(mc16[a-z]?_pc)|(mc16[a-z]?campaign))(*)')
+      REGEXP_LIKE(lower(hashtag_list), '((mc16[a-z]?)|(mc16[a-z]?_cp)|(mc16[a-z]?_trig)|(mc16[a-z]?_hpc)|(mc16[a-z]?_pc)|(mc16[a-z]?campaign))')
   )
       SELECT
         t.campaign,
