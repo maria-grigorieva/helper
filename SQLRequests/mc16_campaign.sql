@@ -102,7 +102,7 @@ with mc16a_tasks as (
       END as phys_category
     from task_hashtags
     where
-      REGEXP_LIKE(lower(hashtag_list), '(*)((mc16[a-z]?)|(mc16[a-z]?_cp)|(mc16[a-z]?_trig)|(mc16[a-z]?_hpc)|(mc16[a-z]?_pc)|(mc16[a-z]?campaign)|(mc16[a-z]?))(*)')
+      REGEXP_LIKE(lower(hashtag_list), '(*)((mc16[a-z]?)|(mc16[a-z]?_cp)|(mc16[a-z]?_trig)|(mc16[a-z]?_hpc)|(mc16[a-z]?_pc)|(mc16[a-z]?campaign))(*)')
   ),
   result as (
       SELECT
@@ -116,6 +116,7 @@ with mc16a_tasks as (
         task.taskname,
         task.hashtag_list,
         task.phys_category,
+        jd.status as dataset_status,
         jd.nevents     AS requested_events,
         jd.neventsused AS processed_events
       FROM
@@ -125,6 +126,7 @@ with mc16a_tasks as (
         task.taskid = jd.jeditaskid
         AND jd.masterid IS NULL
         AND jd.type IN ('input')
+        and jd.status in ('ready', 'done', 'finished')
   )
 select
   subcampaign,
