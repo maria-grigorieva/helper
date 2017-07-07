@@ -51,13 +51,9 @@
                 "type": "long"
             },
             "START_TIME": {
-                "properties": {
-                  "date": {
-                    "type":   "date",
-                    "null_value": "NA",
-                    "format": "dd-mm-yy HH:mm:ss"
-                  }
-                }
+                "type":   "date",
+                "null_value": "NA",
+                "format": "dd-mm-yy HH:mm:ss"
             },
             "DATASET_STATUS": {
                 "fields": {
@@ -96,13 +92,9 @@
                 "type": "text"
             },
             "END_TIME": {
-                "properties": {
-                  "date": {
-                    "type":   "date",
-                    "format": "dd-mm-yy HH:mm:ss",
-                    "null_value": "NA"
-                  }
-                }
+                "type":   "date",
+                "format": "dd-mm-yy HH:mm:ss",
+                "null_value": "NA"
             },
             "PHYS_GROUP": {
                 "fields": {
@@ -114,12 +106,8 @@
                 "type": "text"
             },
             "TIMESTAMP": {
-                "properties": {
-                  "date": {
-                    "type":   "date",
-                    "format": "dd-mm-yy HH:mm:ss"
-                  }
-                }
+                "type":   "date",
+                "format": "dd-mm-yy HH:mm:ss"
             },
             "TASKNAME": {
                 "fields": {
