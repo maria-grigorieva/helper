@@ -1,4 +1,5 @@
 from elasticsearch import Elasticsearch
+from elasticsearch import ElasticsearchException
 from elasticsearch.exceptions import ConflictError
 import pprint
 import sys
@@ -34,47 +35,45 @@ def main():
         es = Elasticsearch([HOST+':'+PORT], http_auth=(USER, PWD))
     else:
         es = Elasticsearch([HOST+':'+PORT])
-    print es.cluster.health()
+    # print es.cluster.health()
+    # print es.cluster.state()
+    removeIndex('mc16', es)
+
     # handler = open('mc16_mapping.json')
     # mapping =  handler.read()
     # print mapping
-    # removeIndex('mc16', es)
     # es.indices.create(index='mc16',
     #                   body=mapping)
-    #
+    # #
     # print es.indices.get_mapping(index='mc16')
 
-
-
-    # Config = ConfigParser.ConfigParser()
-    # Config.read("../settings.cfg")
-    # dsn = Config.get("oracle", "dsn")
-    # print dsn
-    # conn, cursor = DButils.connectDEFT_DSN(dsn)
     #
-    # handler = open('../SQLRequests/mc16_campaign.sql')
-    # result = DButils.ResultIter(conn, handler.read()[:-1], 1, True)
-    #
+    # removeIndex('mc16', es)
+    es.indices.create(index='mc16')
+    Config = ConfigParser.ConfigParser()
+    Config.read("../settings.cfg")
+    dsn = Config.get("oracle", "dsn")
+    print dsn
+    conn, cursor = DButils.connectDEFT_DSN(dsn)
+
+    handler = open('../SQLRequests/mc16_campaign.sql')
+    result = DButils.ResultIter(conn, handler.read()[:-1], 100, True)
+
     curr_tstamp = datetime.datetime.now()
-    #
-    # for i in result:
-    #     json_body = json.dumps(i, ensure_ascii=False)
-    #     print json_body
-    #     # es.index(index='mc16',
-    #     #          doc_type='event_summary',
-    #     #          id=i['TASKID'],
-    #     #          body=json_body,
-    #     #          timestamp=curr_tstamp)
-    #     break
 
-    json_str = {"STATUS": "finished", "DATASETNAME": "mc16_13TeV:mc16_13TeV.423000.ParticleGun_single_electron_egammaET.simul.HITS.e3566_s3007_tid09742134_00", "DESCRIPTION": "E/gamma Single particles with 21.0.16", "HASHTAG_LIST": "ParticleGun, egamma, electron, mc16campaign, singleParticle", "TASKID": 10728431, "CAMPAIGN": "MC16", "PR_ID": 11031, "PROCESSED_EVENTS": 39895000, "TIMESTAMP": "05-07-17 11:25:19", "START_TIME": "17-02-17 03:23:35", "DATASET_STATUS": "ready", "PHYS_CATEGORY": "SingleParticle", "PROJECT": "mc16_13TeV", "STEP_NAME": "Reco", "PHYS_GROUP": "EGAM", "ENERGY_GEV": 13000, "TASKNAME": "mc16_13TeV.423000.ParticleGun_single_electron_egammaET.recon.e3566_s3007_r9117", "SUBCAMPAIGN": "MC16a", "REQUESTED_EVENTS": 39975000, "END_TIME": "22-02-17 18:55:00"}
-    es.index(index='mc16',
-             doc_type='event_summary',
-             id=json_str['TASKID'],
-             body=json_str,
-             timestamp=curr_tstamp)
+    for i in result:
+        json_body = json.dumps(i, ensure_ascii=False)
+        try:
+            res = es.index(index='mc16',
+                     doc_type='event_summary',
+                     id=i['TASKID'],
+                     body=json_body,
+                     timestamp=curr_tstamp)
+            pprint.pprint(res)
+        except ElasticsearchException as e:
+            print json_body
+            print e
 
-    #index_altas_documents("atlas-documents", "cds-glance", es, 1)
 
 def prettyJSON(json_str, indent=4):
     return json.dumps(json_str, indent=indent, sort_keys=True)

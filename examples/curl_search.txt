@@ -91,6 +91,8 @@ curl -u elastic:changeme -XPUT 'http://localhost:9200/dkb-summary?pretty'
 List of all indexes
 curl -u elastic:changeme -GET 'http://localhost:9200/_cat/indices?v'
 
+curl -u esuser:esuser -GET 'http://localhost:10001/_cat/indices?v'
+
 First copy the index to a new name
 curl -u elastic:changeme -POST 'http://localhost:9200/_reindex'
 -d {
@@ -104,3 +106,4 @@ curl -u elastic:changeme -POST 'http://localhost:9200/_reindex'
 
 Now delete the Index
 DELETE /twitter
+
