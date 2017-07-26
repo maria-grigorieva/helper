@@ -25,6 +25,21 @@ def connectDEFT(dbname, dbuser, pwd):
     return connect, cursor
 
 
+def ResultIter(connection, query, arraysize=1000, rows_as_dict=False):
+    cursor = connection.cursor()
+    cursor.execute(query)
+    colnames = [i[0] for i in cursor.description]
+    'An iterator that uses fetchmany to keep memory usage down'
+    while True:
+        results = cursor.fetchmany(arraysize)
+        if not results:
+            break
+        for row in results:
+            if rows_as_dict:
+                yield dict(zip(colnames, row))
+            else:
+                yield row
+
 def QueryAll(connection, query):
     cursor = connection.cursor()
     # print query
