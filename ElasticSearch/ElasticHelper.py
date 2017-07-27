@@ -35,45 +35,71 @@ def main():
         es = Elasticsearch([HOST+':'+PORT], http_auth=(USER, PWD))
     else:
         es = Elasticsearch([HOST+':'+PORT])
-    # print es.cluster.health()
-    # print es.cluster.state()
-    removeIndex('mc16', es)
 
-    # handler = open('mc16_mapping.json')
-    # mapping =  handler.read()
-    # print mapping
-    # es.indices.create(index='mc16',
-    #                   body=mapping)
-    # #
-    # print es.indices.get_mapping(index='mc16')
-
-    #
-    # removeIndex('mc16', es)
-    es.indices.create(index='mc16')
     Config = ConfigParser.ConfigParser()
     Config.read("../settings.cfg")
+    global dsn
     dsn = Config.get("oracle", "dsn")
-    print dsn
-    conn, cursor = DButils.connectDEFT_DSN(dsn)
+    # print es.cluster.health()
+    # print es.cluster.state()
+    # pprint.pprint(es.indices.get_mapping(index='mc16'))
+    indexing(es_instance=es,
+             index_name='mc16',
+             doc_type='event_summary',
+             sql_file='../SQLRequests/mc16_campaign.sql',
+             mapping_file=None,
+             keyfield='taskid')
 
+
+def indexing(es_instance, index_name, doc_type, sql_file, mapping_file=None, keyfield=None):
+    """
+        sample usage:
+        - auth mapping
+        indexing(es_instance=es,
+             index_name='mc16',
+             doc_type='event_summary',
+             sql_file='../SQLRequests/mc16_campaign.sql',
+             mapping_file=None,
+             keyfield='taskid')
+        - custom mapping
+        indexing(es_instance=es,
+             index_name='mc16',
+             doc_type='event_summary',
+             sql_file='../SQLRequests/mc16_campaign.sql',
+             mapping_file='mc16_mapping.json',
+             keyfield='taskid')
+    """
+    # remove old index
+    removeIndex(index_name, es_instance)
+    # recreate index
+    if mapping_file is not None:
+        if isinstance(mapping_file, str):
+            handler = open(mapping_file)
+            mapping = handler.read()
+            es_instance.indices.create(index=index_name,
+                              body=mapping)
+    else:
+        es_instance.indices.create(index=index_name)
+    conn, cursor = DButils.connectDEFT_DSN(dsn)
     handler = open('../SQLRequests/mc16_campaign.sql')
     result = DButils.ResultIter(conn, handler.read()[:-1], 100, True)
 
+    # set current timestamp
     curr_tstamp = datetime.datetime.now()
+    id_counter = 0
 
     for i in result:
         json_body = json.dumps(i, ensure_ascii=False)
         try:
-            res = es.index(index='mc16',
-                     doc_type='event_summary',
-                     id=i['TASKID'],
-                     body=json_body,
-                     timestamp=curr_tstamp)
+            res = es_instance.index(index=index_name,
+                           doc_type=doc_type,
+                           id=i[keyfield] if keyfield is not None else id_counter+1,
+                           body=json_body,
+                           timestamp=curr_tstamp)
             pprint.pprint(res)
         except ElasticsearchException as e:
             print json_body
             print e
-
 
 def prettyJSON(json_str, indent=4):
     return json.dumps(json_str, indent=indent, sort_keys=True)
