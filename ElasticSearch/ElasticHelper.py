@@ -43,10 +43,16 @@ def main():
     # print es.cluster.health()
     # print es.cluster.state()
     # pprint.pprint(es.indices.get_mapping(index='mc16'))
+    # indexing(es_instance=es,
+    #          index_name='mc16',
+    #          doc_type='event_summary',
+    #          sql_file='../SQLRequests/mc16_campaign.sql',
+    #          mapping_file=None,
+    #          keyfield='taskid')
     indexing(es_instance=es,
-             index_name='mc16',
-             doc_type='event_summary',
-             sql_file='../SQLRequests/mc16_campaign.sql',
+             index_name='mc16_datasets',
+             doc_type='datasets_summary',
+             sql_file='../SQLRequests/mc16_datasets.sql',
              mapping_file=None,
              keyfield='taskid')
 
@@ -81,7 +87,7 @@ def indexing(es_instance, index_name, doc_type, sql_file, mapping_file=None, key
     else:
         es_instance.indices.create(index=index_name)
     conn, cursor = DButils.connectDEFT_DSN(dsn)
-    handler = open('../SQLRequests/mc16_campaign.sql')
+    handler = open(sql_file)
     result = DButils.ResultIter(conn, handler.read()[:-1], 100, True)
 
     # set current timestamp
