@@ -35,10 +35,26 @@ def ResultIter(connection, query, arraysize=1000, rows_as_dict=False):
         if not results:
             break
         for row in results:
+            row = fix_lob(row)
             if rows_as_dict:
                 yield dict(zip(colnames, row))
             else:
                 yield row
+
+
+def fix_lob(row):
+    def convert(col):
+        if isinstance(col, cx_Oracle.LOB):
+            result = ''
+            try:
+                result = json.load(col)
+            except:
+                result = str(col)
+            return result
+        else:
+            return col
+    return [convert(c) for c in row]
+
 
 def QueryAll(connection, query):
     cursor = connection.cursor()
@@ -50,13 +66,19 @@ def QueryAll(connection, query):
 
     return dbrows
 
-def QueryToCSV(connection, query, filename):
+def QueryToCSV(connection, query, filename, arraysize=100):
     cursor = connection.cursor()
     cursor.execute(query)
     with open(filename, 'wb') as fout:
         writer = csv.writer(fout)
         writer.writerow([i[0] for i in cursor.description])  # heading row
-        writer.writerows(cursor.fetchall())
+        while True:
+            results = cursor.fetchmany(arraysize)
+            if not results:
+                break
+            for row in results:
+                row = fix_lob(row)
+                writer.writerow(row)
 
 def CSV2JSON(csv_file, json_file):
     csv_file_handler = open(csv_file, 'r')
