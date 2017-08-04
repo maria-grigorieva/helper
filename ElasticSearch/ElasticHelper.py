@@ -11,6 +11,7 @@ import ConfigParser
 import datetime
 from DocumentProcessing import FileConnector
 import DButils
+import time
 
 def main():
     args = parsingArguments()
@@ -40,6 +41,36 @@ def main():
     Config.read("../settings.cfg")
     global dsn
     dsn = Config.get("oracle", "dsn")
+    query_body = '''
+        {
+            "aggs": {
+                "category": {
+                  "terms": {"field": "phys_category.keyword"},
+                  "aggs": {
+                        "step": {
+                            "terms": {"field": "step_name.keyword"},
+                            "aggs": {
+                              "requested": {
+                                    "sum": {"field": "requested_events"}
+                                },
+                                "processed": {
+                                    "sum": {"field": "processed_events"}
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    '''
+    es.indices.clear_cache(index='mc16')
+    start = time.time()
+    res = es.search(index='mc16',
+              doc_type='event_summary',
+              body=query_body)
+    end = time.time()
+    print(end - start)
+    # pprint.pprint(res)
     # print es.cluster.health()
     # print es.cluster.state()
     # pprint.pprint(es.indices.get_mapping(index='mc16'))
@@ -49,12 +80,13 @@ def main():
     #          sql_file='../SQLRequests/mc16_campaign.sql',
     #          mapping_file=None,
     #          keyfield='taskid')
-    indexing(es_instance=es,
-             index_name='mc16_datasets',
-             doc_type='datasets_summary',
-             sql_file='../SQLRequests/mc16_datasets.sql',
-             mapping_file=None,
-             keyfield='taskid')
+    # indexing(es_instance=es,
+    #          index_name='mc16_datasets',
+    #          doc_type='datasets_summary',
+    #          sql_file='../SQLRequests/mc16_datasets.sql',
+    #          mapping_file=None,
+    #          keyfield='taskid')
+
 
 
 def indexing(es_instance, index_name, doc_type, sql_file, mapping_file=None, keyfield=None):
