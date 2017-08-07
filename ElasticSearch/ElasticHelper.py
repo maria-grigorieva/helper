@@ -12,6 +12,8 @@ import datetime
 from DocumentProcessing import FileConnector
 import DButils
 import time
+import re
+import operator
 
 def main():
     args = parsingArguments()
@@ -41,33 +43,41 @@ def main():
     Config.read("../settings.cfg")
     global dsn
     dsn = Config.get("oracle", "dsn")
-    query_body = '''
-        {
-            "aggs": {
-                "category": {
-                  "terms": {"field": "phys_category.keyword"},
-                  "aggs": {
-                        "step": {
-                            "terms": {"field": "step_name.keyword"},
-                            "aggs": {
-                              "requested": {
-                                    "sum": {"field": "requested_events"}
-                                },
-                                "processed": {
-                                    "sum": {"field": "processed_events"}
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    '''
-    es.indices.clear_cache(index='mc16')
+    # query_body = '''
+    #     {
+    #         "aggs": {
+    #             "category": {
+    #               "terms": {"field": "phys_category.keyword"},
+    #               "aggs": {
+    #                     "step": {
+    #                         "terms": {"field": "step_name.keyword"},
+    #                         "aggs": {
+    #                           "requested": {
+    #                                 "sum": {"field": "requested_events"}
+    #                             },
+    #                             "processed": {
+    #                                 "sum": {"field": "processed_events"}
+    #                             }
+    #                         }
+    #                     }
+    #                 }
+    #             }
+    #         }
+    #     }
+    # '''
+    # es.indices.clear_cache(index='mc16')
+    removeIndex('mc16_datasets', es)
     start = time.time()
-    res = es.search(index='mc16',
-              doc_type='event_summary',
-              body=query_body)
+
+    # res = es.search(index='mc16',
+    #           doc_type='event_summary',
+    #           body=query_body)
+    indexing(es_instance=es,
+             index_name='mc16',
+             doc_type='event_summary',
+             sql_file='../SQLRequests/mc16_campaign_without_category.sql',
+             mapping_file=None,
+             keyfield='taskid')
     end = time.time()
     print(end - start)
     # pprint.pprint(res)
@@ -77,7 +87,7 @@ def main():
     # indexing(es_instance=es,
     #          index_name='mc16',
     #          doc_type='event_summary',
-    #          sql_file='../SQLRequests/mc16_campaign.sql',
+    #          sql_file='../SQLRequests/mc16_campaign_without_category.sql',
     #          mapping_file=None,
     #          keyfield='taskid')
     # indexing(es_instance=es,
@@ -86,7 +96,6 @@ def main():
     #          sql_file='../SQLRequests/mc16_datasets.sql',
     #          mapping_file=None,
     #          keyfield='taskid')
-
 
 
 def indexing(es_instance, index_name, doc_type, sql_file, mapping_file=None, keyfield=None):
@@ -115,7 +124,7 @@ def indexing(es_instance, index_name, doc_type, sql_file, mapping_file=None, key
             handler = open(mapping_file)
             mapping = handler.read()
             es_instance.indices.create(index=index_name,
-                              body=mapping)
+                                       body=mapping)
     else:
         es_instance.indices.create(index=index_name)
     conn, cursor = DButils.connectDEFT_DSN(dsn)
@@ -127,6 +136,7 @@ def indexing(es_instance, index_name, doc_type, sql_file, mapping_file=None, key
     id_counter = 0
 
     for i in result:
+        i["phys_category"] = get_category(i.get("hashtag_list"), i.get("taskname"))
         json_body = json.dumps(i, ensure_ascii=False)
         try:
             res = es_instance.index(index=index_name,
@@ -138,6 +148,74 @@ def indexing(es_instance, index_name, doc_type, sql_file, mapping_file=None, key
         except ElasticsearchException as e:
             print json_body
             print e
+
+def get_category(hashtags, taskname):
+    print taskname.split('.')[2].lower()
+    print hashtags
+    PHYS_CATEGORIES_MAP = {'BPhysics':['charmonium','jpsi','bs','bd','bminus','bplus','charm','bottom','bottomonium','b0'],
+                            'BTag':['btagging'],
+                            'Diboson':['diboson','zz', 'ww', 'wz', 'wwbb', 'wwll'],
+                            'DrellYan':['drellyan', 'dy'],
+                            'Exotic':['exotic', 'monojet', 'blackhole', 'technicolor', 'randallsundrum',
+                            'wprime', 'zprime', 'magneticmonopole', 'extradimensions', 'warpeded',
+                            'randallsundrum', 'contactinteraction','seesaw'],
+                            'GammaJets':['photon', 'diphoton'],
+                            'Higgs':['whiggs', 'zhiggs', 'mh125', 'higgs', 'vbf', 'smhiggs', 'bsmhiggs', 'chargedhiggs'],
+                            'Minbias':['minbias'],
+                            'Multijet':['dijet', 'multijet', 'qcd'],
+                            'Performance':['performance'],
+                            'SingleParticle':['singleparticle'],
+                            'SingleTop':['singletop'],
+                            'SUSY':['bino', 'susy', 'pmssm', 'leptosusy', 'rpv','mssm'],
+                            'Triboson':['triplegaugecoupling', 'triboson', 'zzw', 'www'],
+                            'TTbar':['ttbar'],
+                            'TTbarX':['ttw','ttz','ttv','ttvv','4top','ttww'],
+                            'Upgrade':['upgrad'],
+                            'Wjets':['w'],
+                            'Zjets':['z']}
+    match = {}
+
+    for phys_category in PHYS_CATEGORIES_MAP:
+        current_map = [x.strip(' ').lower() for x in PHYS_CATEGORIES_MAP[phys_category]]
+        match[phys_category] = len([x for x in hashtags.lower().split(',') if x.strip(' ') in current_map])
+    closest_category = max(match, key=match.get)
+    if match[closest_category] != 0:
+        return closest_category
+    else:
+        phys_short = taskname.split('.')[2].lower().split('_')[1]
+        print phys_short
+        if 'singletop' in phys_short: return "SingleTop"
+        if 'ttbar'     in phys_short: return "TTbar"
+        if 'jets'      in phys_short: return "Multijet"
+        if 'h125'      in phys_short: return "Higgs"
+        if 'ttbb'      in phys_short: return "TTbarX"
+        if 'ttgamma'   in phys_short: return "TTbarX"
+        if '_tt_'      in phys_short: return "TTbar"
+        if 'upsilon'   in phys_short: return "BPhysics"
+        if 'tanb'      in phys_short: return "SUSY"
+        if '4topci'    in phys_short: return "Exotic"
+        if 'xhh'       in phys_short: return "Higgs"
+        if '3top'      in phys_short: return "TTbarX"
+        if '_wt'       in phys_short: return "SingleTop"
+        if '_wwbb'     in phys_short: return "SingleTop"
+        if '_wenu_'    in phys_short: return "Wjets"
+        # if re.search('singletop', phys_short) is not None: return "SingleTop"
+        # if re.search('ttbar',  phys_short) is not None: return "TTbar"
+        # if re.search('jets', phys_short) is not None: return "Multijet"
+        # if re.search('h125', phys_short) is not None: return "Higgs"
+        # if re.search('ttbb', phys_short) is not None: return "TTbarX"
+        # if re.search('ttgamma', phys_short) is not None: return "TTbarX"
+        # if re.search('_tt_', phys_short) is not None: return "TTbar"
+        # if re.search('upsilon', phys_short) is not None: return "BPhysics"
+        # if re.search('tanb', phys_short) is not None: return "SUSY"
+        # if re.search('4topci', phys_short) is not None: return "Exotic"
+        # if re.search('xhh', phys_short) is not None: return "Higgs"
+        # if re.search('3top', phys_short) is not None: return "TTbarX"
+        # if re.search('_wt', phys_short) is not None: return "SingleTop"
+        # if re.search('_wwbb', phys_short) is not None: return "SingleTop"
+        # if re.search('_wenu_', phys_short) is not None: return "Wjets"
+    return None
+
 
 def prettyJSON(json_str, indent=4):
     return json.dumps(json_str, indent=indent, sort_keys=True)
