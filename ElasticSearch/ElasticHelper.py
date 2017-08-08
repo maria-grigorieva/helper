@@ -66,7 +66,6 @@ def main():
     #     }
     # '''
     # es.indices.clear_cache(index='mc16')
-    removeIndex('mc16_datasets', es)
     start = time.time()
 
     # res = es.search(index='mc16',
@@ -76,6 +75,7 @@ def main():
              index_name='mc16',
              doc_type='event_summary',
              sql_file='../SQLRequests/mc16_campaign_without_category.sql',
+             remove_old=True,
              mapping_file=None,
              keyfield='taskid')
     end = time.time()
@@ -83,7 +83,7 @@ def main():
     # pprint.pprint(res)
     # print es.cluster.health()
     # print es.cluster.state()
-    # pprint.pprint(es.indices.get_mapping(index='mc16'))
+    #pprint.pprint(es.indices.get_mapping(index='mc16'))
     # indexing(es_instance=es,
     #          index_name='mc16',
     #          doc_type='event_summary',
@@ -98,7 +98,7 @@ def main():
     #          keyfield='taskid')
 
 
-def indexing(es_instance, index_name, doc_type, sql_file, mapping_file=None, keyfield=None):
+def indexing(es_instance, index_name, doc_type, sql_file, remove_old=True, mapping_file=None, keyfield=None):
     """
         sample usage:
         - auth mapping
@@ -117,16 +117,17 @@ def indexing(es_instance, index_name, doc_type, sql_file, mapping_file=None, key
              keyfield='taskid')
     """
     # remove old index
-    removeIndex(index_name, es_instance)
-    # recreate index
-    if mapping_file is not None:
-        if isinstance(mapping_file, str):
-            handler = open(mapping_file)
-            mapping = handler.read()
-            es_instance.indices.create(index=index_name,
-                                       body=mapping)
-    else:
-        es_instance.indices.create(index=index_name)
+    if remove_old:
+        removeIndex(index_name, es_instance)
+        # recreate index
+        if mapping_file is not None:
+            if isinstance(mapping_file, str):
+                handler = open(mapping_file)
+                mapping = handler.read()
+                es_instance.indices.create(index=index_name,
+                                           body=mapping)
+        else:
+            es_instance.indices.create(index=index_name)
     conn, cursor = DButils.connectDEFT_DSN(dsn)
     handler = open(sql_file)
     result = DButils.ResultIter(conn, handler.read()[:-1], 100, True)
@@ -134,10 +135,17 @@ def indexing(es_instance, index_name, doc_type, sql_file, mapping_file=None, key
     # set current timestamp
     curr_tstamp = datetime.datetime.now()
     id_counter = 0
+    file_handle = open("temp.txt", 'w')
 
     for i in result:
         i["phys_category"] = get_category(i.get("hashtag_list"), i.get("taskname"))
+        # file_handle.write(i.get("hashtag_list")+"\n")
+        # file_handle.write(i.get("taskname")+"\n")
+        # file_handle.write(i.get("phys_category")+"\n")
+        # file_handle.write("----------------------\n")
+
         json_body = json.dumps(i, ensure_ascii=False)
+
         try:
             res = es_instance.index(index=index_name,
                            doc_type=doc_type,
@@ -148,10 +156,9 @@ def indexing(es_instance, index_name, doc_type, sql_file, mapping_file=None, key
         except ElasticsearchException as e:
             print json_body
             print e
+    file_handle.close()
 
-def get_category(hashtags, taskname):
-    print taskname.split('.')[2].lower()
-    print hashtags
+def get_category(hashtags, taskname, single=True):
     PHYS_CATEGORIES_MAP = {'BPhysics':['charmonium','jpsi','bs','bd','bminus','bplus','charm','bottom','bottomonium','b0'],
                             'BTag':['btagging'],
                             'Diboson':['diboson','zz', 'ww', 'wz', 'wwbb', 'wwll'],
@@ -174,31 +181,34 @@ def get_category(hashtags, taskname):
                             'Wjets':['w'],
                             'Zjets':['z']}
     match = {}
-
+    categories = []
     for phys_category in PHYS_CATEGORIES_MAP:
         current_map = [x.strip(' ').lower() for x in PHYS_CATEGORIES_MAP[phys_category]]
         match[phys_category] = len([x for x in hashtags.lower().split(',') if x.strip(' ') in current_map])
-    closest_category = max(match, key=match.get)
-    if match[closest_category] != 0:
-        return closest_category
+    categories = [cat for cat in match if match[cat] > 0]
+    if len(categories) > 0:
+        return categories
+    #closest_category = max(match, key=match.get)
+    #if match[closest_category] != 0:
+    #    return closest_category
     else:
-        phys_short = taskname.split('.')[2].lower().split('_')[1]
-        print phys_short
-        if 'singletop' in phys_short: return "SingleTop"
-        if 'ttbar'     in phys_short: return "TTbar"
-        if 'jets'      in phys_short: return "Multijet"
-        if 'h125'      in phys_short: return "Higgs"
-        if 'ttbb'      in phys_short: return "TTbarX"
-        if 'ttgamma'   in phys_short: return "TTbarX"
-        if '_tt_'      in phys_short: return "TTbar"
-        if 'upsilon'   in phys_short: return "BPhysics"
-        if 'tanb'      in phys_short: return "SUSY"
-        if '4topci'    in phys_short: return "Exotic"
-        if 'xhh'       in phys_short: return "Higgs"
-        if '3top'      in phys_short: return "TTbarX"
-        if '_wt'       in phys_short: return "SingleTop"
-        if '_wwbb'     in phys_short: return "SingleTop"
-        if '_wenu_'    in phys_short: return "Wjets"
+        phys_short = taskname.split('.')[2].lower()
+        if re.search('singletop', phys_short) is not None: categories.append("SingleTop")
+        if re.search('ttbar', phys_short) is not None: categories.append("TTbar")
+        if re.search('jets', phys_short) is not None: categories.append("Multijet")
+        if re.search('h125', phys_short) is not None: categories.append("Higgs")
+        if re.search('ttbb', phys_short) is not None: categories.append("TTbarX")
+        if re.search('ttgamma', phys_short) is not None: categories.append("TTbarX")
+        if re.search('_tt_', phys_short) is not None: categories.append("TTbar")
+        if re.search('upsilon', phys_short) is not None: categories.append("BPhysics")
+        if re.search('tanb', phys_short) is not None: categories.append("SUSY")
+        if re.search('4topci', phys_short) is not None: categories.append("Exotic")
+        if re.search('xhh', phys_short) is not None: categories.append("Higgs")
+        if re.search('3top', phys_short) is not None: categories.append("TTbarX")
+        if re.search('_wt', phys_short) is not None: categories.append("SingleTop")
+        if re.search('_wwbb', phys_short) is not None: categories.append("SingleTop")
+        if re.search('_wenu_', phys_short) is not None: categories.append("Wjets")
+        return categories
         # if re.search('singletop', phys_short) is not None: return "SingleTop"
         # if re.search('ttbar',  phys_short) is not None: return "TTbar"
         # if re.search('jets', phys_short) is not None: return "Multijet"
@@ -214,7 +224,7 @@ def get_category(hashtags, taskname):
         # if re.search('_wt', phys_short) is not None: return "SingleTop"
         # if re.search('_wwbb', phys_short) is not None: return "SingleTop"
         # if re.search('_wenu_', phys_short) is not None: return "Wjets"
-    return None
+    return "Uncategorized"
 
 
 def prettyJSON(json_str, indent=4):
