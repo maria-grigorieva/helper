@@ -5,8 +5,6 @@ with mc16_tasks as (
       t.step_id,
       t.taskname,
       TO_CHAR(t.timestamp, 'dd-mm-yyyy hh24:mi:ss') as task_timestamp,
-      NVL(TO_CHAR(t.start_time, 'dd-mm-yyyy hh24:mi:ss'), null) as start_time,
-      NVL(TO_CHAR(t.endtime, 'dd-mm-yyyy hh24:mi:ss'), null) as end_time,
       t.subcampaign,
       t.project,
       t.phys_group,
@@ -34,8 +32,6 @@ with mc16_tasks as (
         t.taskid,
         t.taskname,
         t.task_timestamp,
-        t.start_time,
-        t.end_time,
         t.description,
         t.energy_gev,
         LISTAGG(hashtag.hashtag, ', ')
@@ -63,8 +59,6 @@ with mc16_tasks as (
         t.taskid,
         t.taskname,
         t.task_timestamp,
-        t.start_time,
-        t.end_time,
         t.description,
         t.energy_gev
   )
@@ -79,21 +73,23 @@ with mc16_tasks as (
         t.taskid,
         t.taskname,
         t.task_timestamp,
-        t.start_time,
-        t.end_time,
         t.hashtag_list,
         t.description,
         t.energy_gev,
         jd.datasetname,
         jd.status as dataset_status,
         jd.nevents AS requested_events,
-        jd.neventsused AS processed_events
+        jd.neventsused AS processed_events,
+        tag.name as tag_name,
+        tag.trf_release,
+        tag.tag_parameters
       FROM
         task_hashtags t,
-        ATLAS_PANDA.jedi_datasets jd
+        ATLAS_PANDA.jedi_datasets jd,
+        atlas_deft.t_production_tag tag
       WHERE
         t.taskid = jd.jeditaskid
         AND jd.masterid IS NULL
         AND jd.type IN ('input')
         and jd.status in ('ready','done','finished')
-        and REGEXP_LIKE(lower(t.hashtag_list), '((mc16[a-z]?)|(mc16[a-z]?_cp)|(mc16[a-z]?_trig)|(mc16[a-z]?_hpc)|(mc16[a-z]?_pc)|(mc16[a-z]?campaign))');
+        and tag.name = trim(regexp_substr(trim(regexp_substr(t.taskname, '[^.]+',1,5)), '[^_]*$'));
