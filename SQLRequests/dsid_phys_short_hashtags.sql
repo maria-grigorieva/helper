@@ -44,4 +44,6 @@ with
       RIGHT JOIN
       second_one s
       ON
-      f.dataset_id = s.dataset_id;
+      f.dataset_id = s.dataset_id
+    order by
+      f.hashtag_list;
