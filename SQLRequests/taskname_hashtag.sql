@@ -14,8 +14,8 @@ with
         taskid
     )
       select
-        t.taskid,
-        t.taskname,
+        DISTINCT
+        ltrim(regexp_substr(t.taskname, '^(mc)|(data)[a-z0-9A-Z_]+(\.)[0-9]+(\.)[a-z0-9A-Z_]+',1,1),'.') as phys_short,
         f.hashtag_list
       from
         first_part f
