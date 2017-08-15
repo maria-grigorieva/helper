@@ -5,6 +5,7 @@ import time
 import ConfigParser
 from DocumentProcessing import FileConnector
 import cx_Oracle
+import json
 
 Config = ConfigParser.ConfigParser()
 Config.read("settings.cfg")
@@ -858,31 +859,35 @@ __sql_input_data = '''
 
 '''
 
-handler = open('SQLRequests/mc16_campaign.sql')
+handler = open('SQLRequests/mc16a_event_summary.sql')
+
 
 start = time.time()
-DButils.QueryToCSV(conn, handler.read()[:-1], 'mc16_camp.csv')
-DButils.CSV2JSON("mc16_camp.csv", "mc16_camp.json")
+# result = DButils.ResultIter(conn, __sql_task_tags, 100, True)
+# result = DButils.ResultIter(conn, handler.read()[:-1], 100, True)
+# DButils.QueryToCSV(conn, handler.read()[:-1], 'datasets_tags.csv', 100)
+# for r in result:
+#     print json.dumps(r)
+#     # for k,v in r['tag_parameters'].iteritems():
+#     #     print k, v
+#     break
+
+# DButils.QueryToCSV(conn, handler.read()[:-1], 'mc16_camp.csv')
+#DButils.CSV2JSON("mc16_camp.csv", "mc16_camp.json")
 # result = DButils.QueryAll(conn, handler.read())
+DButils.QueryToCSV(conn, handler.read(), 'mc16a_event_summary.csv')
 # result = DButils.ResultIter(conn, __hashtag_request_task_tag_container, 1)
 end = time.time()
+
 #
 # for i in result:
 #     print i
 #
 # print len(result)
-# def fix_lob(row):
-#     def convert(col):
-#         if isinstance(col, cx_Oracle.LOB):
-#             return str(col)
-#         else:
-#             return col
-#
-#     return [convert(c) for c in row]
 #
 # print [fix_lob(r) for r in result]
 #
 # DButils.CSV2JSON("hashtag_request_task_data_container.csv", "hashtag_request_task_data_container.json")
 # end = time.time()
 # print "Query Execution time:"
-# print(end - start)
+print(end - start)
