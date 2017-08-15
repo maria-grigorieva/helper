@@ -41,6 +41,20 @@ def ResultIter(connection, query, arraysize=1000, rows_as_dict=False):
             else:
                 yield row
 
+def OneByOneIter(connection, query, rows_as_dict=False):
+    cursor = connection.cursor()
+    cursor.execute(query)
+    colnames = [i[0].lower() for i in cursor.description]
+    row = cursor.fetchone()
+    while row:
+        row = cursor.fetchone()
+        if not row:
+            break
+        row = fix_lob(row)
+        if rows_as_dict:
+            yield dict(zip(colnames, row))
+        else:
+            yield row
 
 def fix_lob(row):
     def convert(col):
