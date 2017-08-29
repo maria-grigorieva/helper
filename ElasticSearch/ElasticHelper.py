@@ -76,7 +76,13 @@ def main():
     # '''
     # es.indices.clear_cache(index='mc16')
     start = time.time()
-    bulk_insert(es, 'prodsys', 'campaign', '../OracleProdSys2/mc16_campaign_for_ES.sql')
+    indexing(es_instance=es,
+             index_name='prodsys_local',
+             doc_type='MC16',
+             sql_file='../OracleProdSys2/mc16.sql',
+             mapping_file='mapping.json',
+             keyfield='taskid')
+    # bulk_insert(es, 'prodsys_local', 'MC16', 'mapping.json', '../OracleProdSys2/mc16.sql')
     end = time.time()
     print(end - start)
     # pprint.pprint(res)
@@ -84,15 +90,28 @@ def main():
     # print es.cluster.state()
     #pprint.pprint(es.indices.get_mapping(index='mc16'))
 
-def bulk_insert(es_instance, index_name, doc_type, sql_file, pagesize=100):
-    create_index(index_name, es_instance)
+
+def createIndex(index_name, mapping, es_instance):
+    try:
+        es_instance.indices.create(index=index_name, body=mapping)
+    except ElasticsearchException.IndexAlreadyExistsException as e:
+        es_instance.indices.delete(index=index_name)
+        es_instance.indices.create(index=index_name, body=mapping)
+
+def bulk_insert(es_instance, index_name, doc_type, mapping_file, sql_file, pagesize=100):
+    mapping = open(mapping_file).read()
+    es_instance.indices.delete(index=index_name)
+    es_instance.indices.create(index=index_name, body=mapping)
+    # create_index(index_name, mapping, es_instance)
+    # mapping_index = es_instance.indices.put_mapping(index=index_name, doc_type=doc_type, body=mapping)
+    # if create_index["acknowledged"] != True or mapping_index["acknowledged"] != True:
+    #     print "Index creation failed..."
     conn, cursor = DButils.connectDEFT_DSN(dsn)
     handler = open(sql_file)
     result = DButils.ResultIter(conn, handler.read()[:-1], pagesize, True)
     actions = []
     for row in result:
         row["phys_category"] = get_category(row)
-        print row
         actions.append(
             {
                 "_index": index_name,
@@ -172,17 +191,12 @@ def indexing(es_instance, index_name, doc_type, sql_file, remove_old=True, mappi
     result = DButils.ResultIter(conn, handler.read()[:-1], 100, True)
 
     # set current timestamp
-    curr_tstamp = datetime.datetime.now()
+    curr_tstamp = datetime.now()
     id_counter = 0
     # file_handle = open("temp.txt", 'w')
 
     for i in result:
-        print i
-        i["phys_category"] = get_category(i.get("hashtag_list"), i.get("taskname"))
-        # file_handle.write(i.get("hashtag_list")+"\n")
-        # file_handle.write(i.get("taskname")+"\n")
-        # file_handle.write(i.get("phys_category")+"\n")
-        # file_handle.write("----------------------\n")
+        i["phys_category"] = get_category(i)
 
         json_body = json.dumps(i, ensure_ascii=False)
 
@@ -349,14 +363,7 @@ def index_monitor_summary(index, doc_type, es):
 
 #
 # def index_json_file(json_file, index, doc_type, es):
-#
 
-def createIndex(index_name, es):
-    try:
-        es.indices.create(index=index_name)
-    except ElasticsearchException.IndexAlreadyExistsException as e:
-        es.indices.delete(index=index_name)
-        es.indices.create(index=index_name)
 
 def removeIndex(index, es):
     try:
