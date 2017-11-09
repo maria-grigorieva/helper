@@ -107,3 +107,34 @@ curl -u elastic:changeme -POST 'http://localhost:9200/_reindex'
 Now delete the Index
 DELETE /twitter
 
+curl -u elastic:changeme -POST 'http://localhost:9200/mc16/event_summary/_search' -d
+'{
+    "aggs": {
+        "category": {
+          "terms": {"field": "phys_category.keyword"},
+          "aggs": {
+                "step": {
+                    "terms": {"field": "step_name.keyword"},
+                    "aggs": {
+                        "requested": {
+                            "sum": {"field": "requested_events"}
+                        },
+                        "processed": {
+                            "sum": {"field": "processed_events"}
+                        }
+                    }
+                }
+          }
+        }
+    }
+}'
+
+curl -u elastic:changeme -POST 'http://localhost:9200/mc16/event_summary/_search' -d '{
+  "aggs":
+    {
+      "requested": {
+        "sum": {"field": "requested_events"
+      }
+}'
+
+curl -u elastic:changeme -PUT 'http://localhost:9200/' -d '{"mappigns": {"prodsys": {},"datasets": {"_parent": {"type": "prodsys"}}}}'
