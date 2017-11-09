@@ -74,22 +74,153 @@ def main():
     #         }
     #     }
     # '''
+
+    event_summary_report = {
+        "size": 0,
+        "query": {
+            "bool": {
+                        "must": [
+                                    {"term": {"campaign.keyword": "'MC16a_CP' AND 'Atlas-21.0.1' AND 'MCGN' AND 'mc16_13TeV' AND 'ATLAS-R2-2016-01-00-01_VALIDATION' AND 'OFLCOND-MC16-SDR-14'"}},
+                                    {"term": {"status": "done"}}
+                                ]
+                  }
+        },
+        "aggs": {
+            "category": {
+                "terms": {"field": "phys_group.keyword"},
+                "aggs": {
+                    "step": {
+                        "terms": {
+                            "field": "step_name.keyword"
+                        },
+                        "aggs": {
+                            "requested": {
+                                "sum": {
+                                    "field": "requested_events"
+                                }
+                            },
+                            "processed": {
+                                "sum": {"field": "processed_events"}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+      };
+
+
+    keyword_search = {
+		"query": {
+            "query_string": {
+                "query": 'MC16',
+                "analyze_wildcard": 'true'
+            }
+    	},
+    	"from" : 0, "size" : 1000
+  	};
     # es.indices.clear_cache(index='mc16')
-    start = time.time()
-    indexing(es_instance=es,
-             index_name='prodsys_local',
-             doc_type='MC16',
-             sql_file='../OracleProdSys2/mc16.sql',
-             mapping_file='mapping.json',
-             keyfield='taskid')
-    # bulk_insert(es, 'prodsys_local', 'MC16', 'mapping.json', '../OracleProdSys2/mc16.sql')
-    end = time.time()
-    print(end - start)
+    # test(es, keyword_search)
+
+    es.indices.create(index='datasets',
+                               body=
+    {
+        "mappigns": {
+            "prodsys": {},
+            "datasets": {
+                "_parent": {
+                    "type": "prodsys"
+                }
+            }
+        }
+    })
+    #
+    # res = es.create(index='prodsys',
+    #                         doc_type='datasets',
+    #                         id='mc16_13TeV:mc16_13TeV.301051.PowhegPythia8EvtGen_AZNLOCTEQ6L1_DYtautau_2250M2500.simul.HITS.e3649_s3126_tid10974375_00',
+    #                         body={"datasetname": "mc16_13TeV:mc16_13TeV.301051.PowhegPythia8EvtGen_AZNLOCTEQ6L1_DYtautau_2250M2500.simul.HITS.e3649_s3126_tid10974375_00",
+    #                               "bytes": 1000000,
+    #                               "taskid": "11194900"},
+    #                 parent=11194900)
+    # res = es.index(index='prodsys',
+    #                         doc_type='datasets',
+    #                         id='mc16_13TeV:mc16_13TeV.301051.PowhegPythia8EvtGen_AZNLOCTEQ6L1_DYtautau_2250M2500.simul.HITS.e3649_s3126_tid10974375_01',
+    #                         body={"datasetname": "mc16_13TeV:mc16_13TeV.301051.PowhegPythia8EvtGen_AZNLOCTEQ6L1_DYtautau_2250M2500.simul.HITS.e3649_s3126_tid10974375_01",
+    #                               "bytes": 1000100,
+    #                               "taskid": "11194900"},
+    #                parent="11194900")
+    # res = es.index(index='prodsys',
+    #                         doc_type='datasets',
+    #                         id='mc16_13TeV:mc16_13TeV.301051.PowhegPythia8EvtGen_AZNLOCTEQ6L1_DYtautau_2250M2500.simul.HITS.e3649_s3126_tid10974375_02',
+    #                         body={"datasetname": "mc16_13TeV:mc16_13TeV.301051.PowhegPythia8EvtGen_AZNLOCTEQ6L1_DYtautau_2250M2500.simul.HITS.e3649_s3126_tid10974375_02",
+    #                               "bytes": 1000200,
+    #                               "taskid": "11194900"},
+    #                parent="11194900")
+    # res = es.index(index='prodsys',
+    #                         doc_type='datasets',
+    #                         id='mc16_13TeV:mc16_13TeV.301051.PowhegPythia8EvtGen_AZNLOCTEQ6L1_DYtautau_2250M2500.simul.HITS.e3649_s3126_tid10974375_03',
+    #                         body={"datasetname": "mc16_13TeV:mc16_13TeV.301051.PowhegPythia8EvtGen_AZNLOCTEQ6L1_DYtautau_2250M2500.simul.HITS.e3649_s3126_tid10974375_03",
+    #                               "bytes": 1000400,
+    #                               "taskid": "11194900"},
+    #                parent="11194900")
+    #
+    # res = es.index(index='prodsys',
+    #                         doc_type='datasets',
+    #                         id='mc16_valid:mc16_valid.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.simul.HITS.e3698_s2995_tid09646591_00',
+    #                         body={"datasetname": "mc16_valid:mc16_valid.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.simul.HITS.e3698_s2995_tid09646591_00",
+    #                               "bytes": 12300483,
+    #                               "taskid": "11036730"},
+    #                parent="11036730")
+    # res = es.index(index='prodsys',
+    #                         doc_type='datasets',
+    #                         id='mc16_valid:mc16_valid.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.simul.HITS.e3698_s2995_tid09646591_01',
+    #                         body={"datasetname": "mc16_valid:mc16_valid.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.simul.HITS.e3698_s2995_tid09646591_01",
+    #                               "bytes": 13485847,
+    #                               "taskid": "11036730"},
+    #                parent="11036730")
+    # res = es.index(index='prodsys',
+    #                         doc_type='datasets',
+    #                         id='mc16_valid:mc16_valid.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.simul.HITS.e3698_s2995_tid09646591_02',
+    #                         body={"datasetname": "mc16_valid:mc16_valid.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.simul.HITS.e3698_s2995_tid09646591_02",
+    #                               "bytes": 148594372,
+    #                               "taskid": "11036730"},
+    #                parent="11036730")
+    # res = es.index(index='prodsys',
+    #                         doc_type='datasets',
+    #                         id='mc16_valid:mc16_valid.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.simul.HITS.e3698_s2995_tid09646591_03',
+    #                         body={"datasetname": "mc16_valid:mc16_valid.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.simul.HITS.e3698_s2995_tid09646591_03",
+    #                               "bytes": 12345678,
+    #                               "taskid": "11036730"},
+    #                parent="11036730")
+    # removeIndex('datasets', es)
+    # start = time.time()
+    # results = es.search(index='prodsys', body=event_summary_report)
+    # # indexing(es_instance=es,
+    # #          index_name='prodsys_local',
+    # #          doc_type='MC16',
+    # #          sql_file='../OracleProdSys2/mc16.sql',
+    # #          mapping_file='mapping.json',
+    # #          keyfield='taskid')
+    # # bulk_insert(es, 'prodsys_local', 'MC16', 'mapping.json', '../OracleProdSys2/mc16.sql')
+    # end = time.time()
+    # print(end - start)
     # pprint.pprint(res)
     # print es.cluster.health()
     # print es.cluster.state()
     #pprint.pprint(es.indices.get_mapping(index='mc16'))
 
+
+
+def test(es, query, number_of_steps = 100, index='prodsys'):
+    counter = 0
+    for i in range(0, number_of_steps):
+        start = time.time()
+        results = es.search(index=index, body=query)
+        end = time.time()
+        diff = end - start
+        print(diff)
+        counter += diff
+    print 'avg: ' + str(counter/number_of_steps)
 
 def createIndex(index_name, mapping, es_instance):
     try:
