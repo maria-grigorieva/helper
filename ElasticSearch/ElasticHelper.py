@@ -75,65 +75,99 @@ def main():
     #     }
     # '''
 
-    event_summary_report = {
-        "size": 0,
-        "query": {
-            "bool": {
-                        "must": [
-                                    {"term": {"campaign.keyword": "'MC16a_CP' AND 'Atlas-21.0.1' AND 'MCGN' AND 'mc16_13TeV' AND 'ATLAS-R2-2016-01-00-01_VALIDATION' AND 'OFLCOND-MC16-SDR-14'"}},
-                                    {"term": {"status": "done"}}
-                                ]
-                  }
-        },
-        "aggs": {
-            "category": {
-                "terms": {"field": "phys_group.keyword"},
-                "aggs": {
-                    "step": {
-                        "terms": {
-                            "field": "step_name.keyword"
-                        },
-                        "aggs": {
-                            "requested": {
-                                "sum": {
-                                    "field": "requested_events"
-                                }
-                            },
-                            "processed": {
-                                "sum": {"field": "processed_events"}
-                            }
-                        }
-                    }
-                }
-            }
-        }
-      };
-
-
-    keyword_search = {
-		"query": {
-            "query_string": {
-                "query": 'MC16',
-                "analyze_wildcard": 'true'
-            }
-    	},
-    	"from" : 0, "size" : 1000
-  	};
+    # event_summary_report = {
+    #     "size": 0,
+    #     "query": {
+    #         "bool": {
+    #                     "must": [
+    #                                 {"term": {"campaign.keyword": "'MC16a_CP' AND 'Atlas-21.0.1' AND 'MCGN' AND 'mc16_13TeV' AND 'ATLAS-R2-2016-01-00-01_VALIDATION' AND 'OFLCOND-MC16-SDR-14'"}},
+    #                                 {"term": {"status": "done"}}
+    #                             ]
+    #               }
+    #     },
+    #     "aggs": {
+    #         "category": {
+    #             "terms": {"field": "phys_group.keyword"},
+    #             "aggs": {
+    #                 "step": {
+    #                     "terms": {
+    #                         "field": "step_name.keyword"
+    #                     },
+    #                     "aggs": {
+    #                         "requested": {
+    #                             "sum": {
+    #                                 "field": "requested_events"
+    #                             }
+    #                         },
+    #                         "processed": {
+    #                             "sum": {"field": "processed_events"}
+    #                         }
+    #                     }
+    #                 }
+    #             }
+    #         }
+    #     }
+    #   };
+    #
+    #
+    # keyword_search = {
+		# "query": {
+    #         "query_string": {
+    #             "query": 'MC16',
+    #             "analyze_wildcard": 'true'
+    #         }
+    # 	},
+    # 	"from" : 0, "size" : 1000
+  	# };
     # es.indices.clear_cache(index='mc16')
     # test(es, keyword_search)
 
-    es.indices.create(index='datasets',
-                               body=
-    {
-        "mappigns": {
-            "prodsys": {},
-            "datasets": {
-                "_parent": {
-                    "type": "prodsys"
-                }
-            }
-        }
-    })
+    #removeIndex('prodsys_rucio', es)
+
+    # results_file = open('results.json', 'r')
+    # type = 'tasks'
+    # actions = []
+    # for line in results_file:
+    #     curr = json.loads(line)
+    #     id = curr['taskid']
+    #     actions.append(
+    #         {
+    #             "_index": 'prodsys_rucio',
+    #             "_type": type,
+    #             "_id": id,
+    #             "_source": curr,
+    #         })
+    # helpers.bulk(es, actions)
+
+    datasets_file = open('output_datasets.json', 'r')
+    type = 'rucio_datasets'
+    actions = []
+    for line in datasets_file:
+        curr = json.loads(line)
+        id = curr['taskid']
+        actions.append(
+            {
+                "_index": 'prodsys_rucio',
+                "_parent": str(id),
+                "_type": type,
+                "_id": id,
+                "_source": curr,
+            })
+    helpers.bulk(es, actions)
+
+
+    # es.indices.create(index='datasets',
+    #                            body=
+    # {
+    #     "mappigns": {
+    #         "prodsys": {},
+    #         "datasets": {
+    #             "_parent": {
+    #                 "type": "prodsys"
+    #             }
+    #         }
+    #     }
+    # })
     #
     # res = es.create(index='prodsys',
     #                         doc_type='datasets',
