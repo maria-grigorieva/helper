@@ -107,4 +107,4 @@ with mc16a_tasks as (
       step_name
     order by
       phys_category,
-      step_name
+      step_name;
