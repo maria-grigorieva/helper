@@ -1,144 +1,148 @@
 {
-        "mappings": {
-            "event_summary": {
-                "properties": {
-                    "STATUS": {
-                        "fields": {
-                            "keyword": {
-                                "ignore_above": 256,
-                                "type": "keyword"
-                            }
-                        },
-                        "type": "text"
+    "mappings": {
+        "event_summary": {
+            "properties": {
+                "status": {
+                    "fields": {
+                        "keyword": {
+                            "ignore_above": 256,
+                            "type": "keyword"
+                        }
                     },
-                    "DATASETNAME": {
-                        "fields": {
-                            "keyword": {
-                                "ignore_above": 256,
-                                "type": "keyword"
-                            }
-                        },
-                        "type": "text"
+                    "type": "text"
+                },
+                "datasetname": {
+                    "fields": {
+                        "keyword": {
+                            "ignore_above": 256,
+                            "type": "keyword"
+                        }
                     },
-                    "TASKID": {
-                        "type": "long"
+                    "type": "text"
+                },
+                "taskid": {
+                    "type": "long"
+                },
+                "description": {
+                    "fields": {
+                        "keyword": {
+                            "ignore_above": 256,
+                            "type": "keyword"
+                        }
                     },
-                    "DESCRIPTION": {
-                        "fields": {
-                            "keyword": {
-                                "ignore_above": 256,
-                                "type": "keyword"
-                            }
-                        },
-                        "type": "text"
+                    "type": "text"
+                },
+                "campaign": {
+                    "fields": {
+                        "keyword": {
+                            "ignore_above": 256,
+                            "type": "keyword"
+                        }
                     },
-                    "CAMPAIGN": {
-                        "fields": {
-                            "keyword": {
-                                "ignore_above": 256,
-                                "type": "keyword"
-                            }
-                        },
-                        "type": "text"
+                    "type": "text"
+                },
+                "pr_id": {
+                    "type": "long"
+                },
+                "processed_events": {
+                    "type": "long"
+                },
+                "energy_gev": {
+                    "type": "long"
+                },
+                "start_time": {
+                    "type": "date",
+                    "format": "dd-MM-yyyy HH:mm:ss"
+                },
+                "dataset_status": {
+                    "fields": {
+                        "keyword": {
+                            "ignore_above": 256,
+                            "type": "keyword"
+                        }
                     },
-                    "PR_ID": {
-                        "type": "long"
+                    "type": "text"
+                },
+                "phys_category": {
+                    "fields": {
+                        "keyword": {
+                            "ignore_above": 256,
+                            "type": "keyword"
+                        }
                     },
-                    "PROCESSED_EVENTS": {
-                        "type": "long"
+                    "type": "text"
+                },
+                "project": {
+                    "fields": {
+                        "keyword": {
+                            "ignore_above": 256,
+                            "type": "keyword"
+                        }
                     },
-                    "ENERGY_GEV": {
-                        "type": "long"
+                    "type": "text"
+                },
+                "step_name": {
+                    "fields": {
+                        "keyword": {
+                            "ignore_above": 256,
+                            "type": "keyword"
+                        }
                     },
-                    "START_TIME": {
-                        "type": "date",
-                        "format": "dd-mm-yy HH:mm:ss"
+                    "type": "text"
+                },
+                "end_time": {
+                    "type": "date",
+                    "format": "dd-MM-yyyy HH:mm:ss"
+                },
+                "phys_group": {
+                    "fields": {
+                        "keyword": {
+                            "ignore_above": 256,
+                            "type": "keyword"
+                        }
                     },
-                    "DATASET_STATUS": {
-                        "fields": {
-                            "keyword": {
-                                "ignore_above": 256,
-                                "type": "keyword"
-                            }
-                        },
-                        "type": "text"
+                    "type": "text"
+                },
+                "task_timestamp": {
+                    "type": "date",
+                    "format": "dd-MM-yyyy HH:mm:ss"
+                },
+                "taskname": {
+                    "fields": {
+                        "keyword": {
+                            "ignore_above": 256,
+                            "type": "keyword"
+                        }
                     },
-                    "PHYS_CATEGORY": {
-                        "fields": {
-                            "keyword": {
-                                "ignore_above": 256,
-                                "type": "keyword"
-                            }
-                        },
-                        "type": "text"
+                    "type": "text"
+                },
+                "subcampaign": {
+                    "fields": {
+                        "keyword": {
+                            "ignore_above": 256,
+                            "type": "keyword"
+                        }
                     },
-                    "PROJECT": {
-                        "fields": {
-                            "keyword": {
-                                "ignore_above": 256,
-                                "type": "keyword"
-                            }
-                        },
-                        "type": "text"
+                    "type": "text"
+                },
+                "requested_events": {
+                    "type": "long"
+                },
+                "hashtag_list": {
+                    "fields": {
+                        "keyword": {
+                            "ignore_above": 256,
+                            "type": "keyword"
+                        }
                     },
-                    "STEP_NAME": {
-                        "fields": {
-                            "keyword": {
-                                "ignore_above": 256,
-                                "type": "keyword"
-                            }
-                        },
-                        "type": "text"
-                    },
-                    "END_TIME": {
-                        "type": "date",
-                        "format": "dd-mm-yy HH:mm:ss"
-                    },
-                    "PHYS_GROUP": {
-                        "fields": {
-                            "keyword": {
-                                "ignore_above": 256,
-                                "type": "keyword"
-                            }
-                        },
-                        "type": "text"
-                    },
-                    "TIMESTAMP": {
-                        "type": "date",
-                        "format": "dd-mm-yy HH:mm:ss"
-                    },
-                    "TASKNAME": {
-                        "fields": {
-                            "keyword": {
-                                "ignore_above": 256,
-                                "type": "keyword"
-                            }
-                        },
-                        "type": "text"
-                    },
-                    "SUBCAMPAIGN": {
-                        "fields": {
-                            "keyword": {
-                                "ignore_above": 256,
-                                "type": "keyword"
-                            }
-                        },
-                        "type": "text"
-                    },
-                    "REQUESTED_EVENTS": {
-                        "type": "long"
-                    },
-                    "HASHTAG_LIST": {
-                        "fields": {
-                            "keyword": {
-                                "ignore_above": 256,
-                                "type": "keyword"
-                            }
-                        },
-                        "type": "text"
-                    }
+                    "type": "text"
+                },
+                "@timestamp" : {
+                  "type" : "date",
+                  "format" : "dd-MM-yyyy HH:mm:ss"
                 }
             }
         }
-
+    }
 }
+

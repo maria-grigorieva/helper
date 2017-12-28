@@ -861,23 +861,78 @@ __sql_input_data = '''
 
 handler = open('SQLRequests/mc16a_event_summary.sql')
 
+sql_test_request = "SELECT taskid from t_production_task where subcampaign = 'MC16a' and phys_group = 'MCGN' and project = 'mc16_13TeV'"
 
-start = time.time()
-# result = DButils.ResultIter(conn, __sql_task_tags, 100, True)
+datasets_query = '''
+SELECT
+  count(jd.datasetname)
+FROM
+  t_production_task t
+  JOIN
+  ATLAS_PANDA.jedi_datasets jd
+  ON jd.jeditaskid = t.taskid
+  LEFT JOIN t_task tt
+  ON t.taskid = tt.taskid
+WHERE
+  jd.type IN ('output') AND
+      t.timestamp > to_date('01-01-2016', 'dd-mm-yyyy hh24:mi:ss') AND
+      t.timestamp <= to_date('30-11-2017', 'dd-mm-yyyy hh24:mi:ss') AND
+      t.pr_id > 300
+'''
+
+ML_task_hashtags = '''
+select t.taskname,
+LISTAGG(hashtag.hashtag, ', ')
+        WITHIN GROUP (
+          ORDER BY t.taskid) AS hashtag_list
+from t_production_task t
+  LEFT JOIN ATLAS_DEFT.t_ht_to_task ht_t
+  ON t.taskid = ht_t.taskid
+  LEFT JOIN ATLAS_DEFT.t_hashtag hashtag
+  ON hashtag.ht_id = ht_t.ht_id
+group by t.taskname
+'''
+
+xx = '''
+select * from t_production_dataset where name LIKE '%.EVNT_%.%'
+'''
+
+result = DButils.ResultIter(conn, xx, 100, True)
+for item in result:
+    print item
+
 # result = DButils.ResultIter(conn, handler.read()[:-1], 100, True)
-# DButils.QueryToCSV(conn, handler.read()[:-1], 'datasets_tags.csv', 100)
+#DButils.QueryToCSV(conn, handler.read()[:-1], 'datasets_tags.csv', 100)
+# DButils.QueryToCSV(conn, ML_task_hashtags, 'ML_task_hashtags.csv', 10000)
+#
+# start = time.time()
+# result = DButils.ResultIter(conn, handler.read()[:-1], 100, True)
 # for r in result:
 #     print json.dumps(r)
-#     # for k,v in r['tag_parameters'].iteritems():
-#     #     print k, v
-#     break
+# end = time.time()
+# diff = end - start
+# print(diff)
+# counter = 0
+# for i in range(0, 10):
+#     start = time.time()
+#     result = DButils.ResultIter(conn, handler.read()[:-1], 100, True)
+#     for r in result:
+#         print json.dumps(r)
+#     end = time.time()
+#     diff = end - start
+#     print(diff)
+#     counter += diff
+# print(counter / 10)
+
+    # for k,v in r['tag_parameters'].iteritems():
+    #     print k, v
 
 # DButils.QueryToCSV(conn, handler.read()[:-1], 'mc16_camp.csv')
 #DButils.CSV2JSON("mc16_camp.csv", "mc16_camp.json")
 # result = DButils.QueryAll(conn, handler.read())
-DButils.QueryToCSV(conn, handler.read(), 'mc16a_event_summary.csv')
+#DButils.QueryToCSV(conn, handler.read()[:-1], 'mc16_events.csv')
 # result = DButils.ResultIter(conn, __hashtag_request_task_tag_container, 1)
-end = time.time()
+# end = time.time()
 
 #
 # for i in result:
@@ -890,4 +945,4 @@ end = time.time()
 # DButils.CSV2JSON("hashtag_request_task_data_container.csv", "hashtag_request_task_data_container.json")
 # end = time.time()
 # print "Query Execution time:"
-print(end - start)
+# print(end - start)

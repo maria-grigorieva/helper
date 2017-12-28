@@ -1,77 +1,48 @@
 import json
 import argparse
 import ConfigParser
-import datetime
-import DButils
 import time
 import re
-import os
+import DButils
+import sys
+
+try:
+    import cx_Oracle
+except:
+    print "****ERROR : DButils. Cannot import cx_Oracle"
+    pass
+
+def connectDEFT_DSN(dsn):
+    connect = cx_Oracle.connect(dsn)
+    cursor = connect.cursor()
+
+    return connect, cursor
 
 def main():
     """
-    --input <SQL file> --output <directory> --size 1000
+    --input <SQL file> --size <page size>
     :return:
     """
     args = parsingArguments()
     if (args.input):
-        global INPUT
-        INPUT = args.input
-    if (args.output):
-        global OUTPUT
-        OUTPUT = args.output
-    global SIZE
+        input = args.input
     if (args.size):
-        SIZE = args.size
+        size = args.size
     else:
-        SIZE = 500
+        size = 100
     Config = ConfigParser.ConfigParser()
-    Config.read("../settings.cfg")
+    Config.read("settings.cfg")
     global dsn
     dsn = Config.get("oracle", "dsn")
 
     start = time.time()
-
-    oracle2json(INPUT, OUTPUT, SIZE)
+    conn, cursor = connectDEFT_DSN(dsn)
+    sql_handler = open(input)
+    result = DButils.ResultIter(conn, sql_handler.read()[:-1], size, True)
+    for row in result:
+        sys.stdout.write(json.dumps(row) + '\n')
     end = time.time()
     print(end - start)
-
-def oracle2json(sql_file, output, arraysize=500):
-    """
-    Processing query row by row, with parsing LOB values.
-    :param sql_file: file with SQL query
-    :param output: output directory
-    :param arraysize: number of rows, processed at a time
-    :return:
-    """
-    conn, cursor = DButils.connectDEFT_DSN(dsn)
-    sql_handler = open(sql_file)
-    result = DButils.OneByOneIter(conn, sql_handler.read()[:-1], True)
-    counter = -1
-    if not os.path.exists(output):
-        os.makedirs(output)
-    json_handler = open('%s/%s_%d.json' % (output, output, 0), 'wb')
-    result_arr = []
-
-    for i in result:
-        i["phys_category"] = get_category(i.get("hashtag_list"), i.get("taskname"))
-        json_body = json.dumps(i, ensure_ascii=False)
-        if (counter%int(arraysize) == 0):
-            json_handler = open('%s/%s_%d.json' % (output, output, counter), 'wb')
-            json_handler.write('[')
-        result_arr.append(json_body)
-        json_handler.write(json_body)
-        counter += 1
-        if (counter % int(arraysize) != 0):
-            json_handler.write(',')
-            json_handler.write('\n')
-        else:
-            json_handler.write(']')
-            json_handler.close()
-    if not json_handler.closed:
-        json_handler.seek(-1, os.SEEK_END)
-        json_handler.truncate()
-        json_handler.write(']')
-        json_handler.close()
 
 def get_category(hashtags, taskname):
     """
@@ -140,3 +111,4 @@ def parsingArguments():
 
 if  __name__ =='__main__':
     main()
+

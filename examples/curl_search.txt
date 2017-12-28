@@ -82,6 +82,7 @@ curl -i -u elastic:changeme -XDELETE 'http://localhost:9200/hashtag/summary/newI
 
 12) Mapping
 curl -u elastic:changeme -XGET 'http://localhost:9200/atlas_documents/_mapping/cds_glance?pretty'
+curl -u elastic:changeme -XGET 'http://localhost:9200/mc16/_mapping?pretty'
 
 13) reindex
 
@@ -137,4 +138,76 @@ curl -u elastic:changeme -POST 'http://localhost:9200/mc16/event_summary/_search
       }
 }'
 
-curl -u elastic:changeme -PUT 'http://localhost:9200/' -d '{"mappigns": {"prodsys": {},"datasets": {"_parent": {"type": "prodsys"}}}}'
+1) create index
+curl -u elastic:changeme -XPUT 'http://localhost:9200/prodsys_rucio' --data-binary "@new_mapping.json"; echo
+2) check index
+curl -u elastic:changeme -XGET 'localhost:9200/_cat/indices?v'
+3) remove index
+curl -u elastic:changeme -DELETE 'localhost:9200/prodsys_rucio?pretty'
+
+curl -u esuser:PhoodeiSuk7aa7aem5Ga -XGET 'localhost:10001/prodsys_rucio_ami/task/_search?pretty' --data-binary "@es_query.json"; echo
+
+curl -u elastic:changeme -XPUT 'http://localhost:9200/mc16/_mapping/event_summary?pretty' --data-binary "@mc16_mapping.json"; echo
+
+curl -u esuser:PhoodeiSuk7aa7aem5Ga -XPUT 'localhost:10001/ami_metadata' --data-binary "@mapping.json"; echo
+
+curl -u esuser:PhoodeiSuk7aa7aem5Ga -XGET 'localhost:10001/_cat/indices?v'
+
+create new index with the same mapping
+curl -u elastic:changeme -XPUT 'http://localhost:9200/prodsys_new' --data-binary "@prodsys_mapping.json"; echo
+curl -u elastic:changeme -XPUT 'http://localhost:9200/custom_analyzer' --data-binary "@temp_mapping.json"; echo
+
+get mapping from prodsys
+curl -u elastic:changeme -XGET 'http://localhost:9200/prodsys/_mapping?pretty' > prodsys_mapping.json
+curl -u elastic:changeme -XGET 'http://localhost:9200/prodsys_new/_mapping?pretty' > prodsys_new_mapping.json
+curl -u elastic:changeme -XGET 'http://localhost:9200/custom_analyzer/_mapping?pretty' > custom_analyzer_mapping.json
+curl -u elastic:changeme -XGET 'http://localhost:9200/temp/_mapping?pretty' > temp_new_mapping.json
+
+check indexes
+curl -u elastic:changeme -XGET 'http://localhost:9200/_cat/indices?v'
+
+update mapping
+curl -u elastic:changeme -XPUT 'http://localhost:9200/prodsys/campaign/_mapping' --data-binary "@temp_mapping.json"; echo
+curl -u elastic:changeme -XPUT 'http://localhost:9200/prodsys_new/_mapping/campaign?pretty' --data-binary "@temp_mapping.json"; echo
+
+delete index
+curl -u elastic:changeme -XDELETE 'localhost:9200/prodsys_new?pretty'
+curl -u elastic:changeme -XDELETE 'localhost:9200/temp?pretty'
+curl -u elastic:changeme -XDELETE 'localhost:9200/custom_analyzer?pretty'
+
+curl -u elastic:changeme -POST 'http://localhost:9200/_reindex' -d '{
+  "source": {
+    "index": "prodsys"
+  },
+  "dest": {
+    "index": "custom_analyzer"
+  }
+}'
+
+remove index prodsys
+curl -u elastic:changeme -XDELETE 'localhost:9200/prodsys?pretty'
+
+curl -u elastic:changeme -POST 'http://localhost:9200/_aliases' -d '{
+  "actions": [
+    { "add":    { "index": "temp", "alias": "prodsys" }}
+  ]
+}'
+
+
+GET custom_analyzer/_analyze
+{
+  "analyzer" : "task_dataset_name",
+  "text" : "mc16_13TeV:mc16_13TeV.361022.Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ2W.simul.HITS.e3668_s2997_tid09756488_00"
+}
+
+GET custom_analyzer/campaign/_search
+{
+  "query": {
+    "match": {
+     "datasetname": {
+      "query": "mc16 13TeV recon aod",
+      "operator": "and"
+    }
+    }
+  }
+}

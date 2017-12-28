@@ -124,7 +124,21 @@ def main():
 
     #removeIndex('prodsys_rucio', es)
 
-    # results_file = open('results.json', 'r')
+    results_file = open('results_11nov.json', 'r')
+    found = 0
+    not_found = 0
+    for line in results_file:
+        curr = json.loads(line)
+        id = curr['taskid']
+        print id
+        try:
+            es.get(index='prodsys', id=id)
+            found += 1
+        except Exception:
+            not_found += 1
+    print found
+    print not_found
+    #print result
     # type = 'tasks'
     # actions = []
     # for line in results_file:
@@ -139,21 +153,22 @@ def main():
     #         })
     # helpers.bulk(es, actions)
 
-    datasets_file = open('output_datasets.json', 'r')
-    type = 'rucio_datasets'
-    actions = []
-    for line in datasets_file:
-        curr = json.loads(line)
-        id = curr['taskid']
-        actions.append(
-            {
-                "_index": 'prodsys_rucio',
-                "_parent": str(id),
-                "_type": type,
-                "_id": id,
-                "_source": curr,
-            })
-    helpers.bulk(es, actions)
+    # datasets_file = open('output_datasets.json', 'r')
+    # type = 'rucio_datasets'
+    # actions = []
+    # for line in datasets_file:
+    #     curr = json.loads(line)
+    #     id = curr['taskid']
+    #     actions.append(
+    #         {
+    #             "_index": 'prodsys_rucio',
+    #             "_parent": str(id),
+    #             "_type": type,
+    #             "_id": id,
+    #             "_source": curr,
+    #         })
+    # helpers.bulk(es, actions)
+
 
 
     # es.indices.create(index='datasets',
